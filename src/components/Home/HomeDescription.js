@@ -37,7 +37,7 @@ const HomeDescription = ({ isLoading }) => {
             }}
             className="d-flex justify-content-center align-items-center"
           >
-            Finding your next favorite travel destination awaits.
+            FFinding your next favorite travel destination awaits.
             <span className=" w-100 home-description-button-container">
               <Link
                 className="btn btn-outline-dark mt-1 rounded-2 hero-btn d-flex justify-content-center align-items-center"
