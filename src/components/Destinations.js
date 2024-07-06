@@ -9,7 +9,7 @@ function Destinations() {
     <>
       <AirlineDisplayContainer
         destinations={destinations}
-        // stateDestinations={destinations}
+        stateDestinations={destinations}
       />
     </>
   );
@@ -18,7 +18,9 @@ function Destinations() {
 const destinationsLoader = async ({ params }) => {
   const { slug } = params;
 
-  const response = await axios.get(`http://localhost:8080/airlines/${slug}`);
+  const response = await axios.get(
+    `https://api.flightinrange.com/airlines/${slug}/destinations`,
+  );
 
   return response.data;
 };
