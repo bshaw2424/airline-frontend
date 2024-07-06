@@ -263,7 +263,9 @@ export default function AirlineLanding() {
 }
 
 export const destinationIndexLoader = async () => {
-  const response = await axios.get(`http://localhost:8000/api/airlines/info`);
+  const response = await axios.get(
+    `https://whale-app-v8vd4.ondigitalocean.app/api/airlines/info`,
+  );
 
   return response.data;
 };

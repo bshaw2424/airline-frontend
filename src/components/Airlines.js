@@ -60,7 +60,7 @@ export default function Airlines({
 
 export const destinationIndexLoader = async () => {
   const response = await axios.get(
-    `https://api.flightinrange.com/airlines/info`,
+    `https://whale-app-v8vd4.ondigitalocean.app/api/airlines/info`,
   );
 
   return response.data;
