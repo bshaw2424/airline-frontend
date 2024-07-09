@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 
-export default function AirlineDropdownList({ getAirlineUrl }) {
+export default function AirlineDropdownList({ getAirlineUrl, destinations }) {
   const [airlines, setAirlines] = useState([]);
 
   useEffect(() => {
@@ -18,31 +18,21 @@ export default function AirlineDropdownList({ getAirlineUrl }) {
       .catch(e => console.log(e.message));
   }, []);
 
-  // Ensure the data is being received and logged correctly
-  console.log("Airlines state:", airlines);
+  const sortedAirlines = airlines.map(airline => {
+    const { slug, name, _id } = airline;
 
-  const sortedAirlines = airlines
-    .sort((a, b) => a.name.localeCompare(b.name))
-    .map(airline => {
-      const { slug, name, _id } = airline;
-      return (
-        <li key={_id}>
-          <Link
-            onClick={e => getAirlineUrl(e)}
-            to={`/airlines/${slug}/destinations`}
-            className="dropdown-item"
-          >
-            {name}
-          </Link>
-        </li>
-      );
-    });
-
-  // Log sorted airline names to verify sorting without including JSX elements
-  console.log(
-    "Sorted airline names:",
-    airlines.map(a => a.name),
-  );
+    return (
+      <li key={`${name}-${_id}`}>
+        <Link
+          onClick={e => getAirlineUrl(e)}
+          to={`/airlines/${slug}/destinations`}
+          className="dropdown-item"
+        >
+          {name}
+        </Link>
+      </li>
+    );
+  });
 
   return (
     <div className="dropdown">
