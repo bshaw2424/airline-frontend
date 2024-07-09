@@ -18,6 +18,32 @@ export default function AirlineDropdownList({ getAirlineUrl }) {
       .catch(e => console.log(e.message));
   }, []);
 
+  // Ensure the data is being received and logged correctly
+  console.log("Airlines state:", airlines);
+
+  const sortedAirlines = airlines
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map(airline => {
+      const { slug, name, _id } = airline;
+      return (
+        <li key={_id}>
+          <Link
+            onClick={e => getAirlineUrl(e)}
+            to={`/airlines/${slug}/destinations`}
+            className="dropdown-item"
+          >
+            {name}
+          </Link>
+        </li>
+      );
+    });
+
+  // Log sorted airline names to verify sorting without including JSX elements
+  console.log(
+    "Sorted airline names:",
+    airlines.map(a => a.name),
+  );
+
   return (
     <div className="dropdown">
       <button
@@ -29,30 +55,7 @@ export default function AirlineDropdownList({ getAirlineUrl }) {
       >
         Change Airline
       </button>
-
-      <ul className="dropdown-menu">
-        {Array.isArray(airlines) && airlines.length > 0 ? (
-          airlines
-            .sort((a, b) => a.name.localeCompare(b.name))
-            .map(airline => {
-              const { slug, name, _id } = airline;
-
-              return (
-                <li key={_id}>
-                  <Link
-                    onClick={e => getAirlineUrl(e)}
-                    to={`/airlines/${slug}/destinations`}
-                    className="dropdown-item"
-                  >
-                    {name}
-                  </Link>
-                </li>
-              );
-            })
-        ) : (
-          <li>No airlines available</li>
-        )}
-      </ul>
+      <ul className="dropdown-menu">{sortedAirlines}</ul>
     </div>
   );
 }
