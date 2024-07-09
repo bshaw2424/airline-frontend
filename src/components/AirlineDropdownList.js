@@ -18,22 +18,6 @@ export default function AirlineDropdownList({ getAirlineUrl, destinations }) {
       .catch(e => console.log(e.message));
   }, []);
 
-  const sortedAirlines = airlines.map(airline => {
-    const { slug, name, _id } = airline;
-
-    return (
-      <li key={`${name}-${_id}`}>
-        <Link
-          onClick={e => getAirlineUrl(e)}
-          to={`/airlines/${slug}/destinations`}
-          className="dropdown-item"
-        >
-          {name}
-        </Link>
-      </li>
-    );
-  });
-
   return (
     <div className="dropdown">
       <button
@@ -45,7 +29,22 @@ export default function AirlineDropdownList({ getAirlineUrl, destinations }) {
       >
         Change Airline
       </button>
-      <ul className="dropdown-menu">{sortedAirlines}</ul>
+      <ul className="dropdown-menu">
+        {airlines.map(airline => {
+          const { slug, name, _id } = airline;
+          return (
+            <li key={`${name}-${_id}`}>
+              <Link
+                onClick={e => getAirlineUrl(e)}
+                to={`/airlines/${slug}/destinations`}
+                className="dropdown-item"
+              >
+                {name}
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
 }
