@@ -1,27 +1,9 @@
-import React, { useEffect, useState } from "react";
+import { useState } from "react";
 import { Marker, InfoWindow } from "@react-google-maps/api";
 import { getIataCodeFromIcaoCode } from "../../Utilities";
 
 export default function DisplayMarkers({ coords, airlineIndex }) {
   const [selectedMarker, setSelectedMarker] = useState(null);
-  const [isMobile, setIsMobile] = useState(
-    window.matchMedia("(max-width: 768px)").matches,
-  );
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia("(max-width: 768px)");
-    const handleMediaQueryChange = e => {
-      setIsMobile(e.matches);
-    };
-
-    // Add event listener
-    mediaQuery.addListener(handleMediaQueryChange);
-
-    // Clean up event listener on component unmount
-    return () => {
-      mediaQuery.removeListener(handleMediaQueryChange);
-    };
-  }, []);
 
   const handleMarkerClick = title => {
     window.open(
@@ -30,18 +12,6 @@ export default function DisplayMarkers({ coords, airlineIndex }) {
       )}`,
       "_blank",
     );
-  };
-
-  const handleInteraction = (airlineDetails, eventType) => {
-    if (isMobile) {
-      handleMarkerClick(airlineDetails.airport);
-    } else {
-      if (eventType === "mouseover") {
-        setSelectedMarker(airlineDetails);
-      } else if (eventType === "mouseout") {
-        setSelectedMarker(null);
-      }
-    }
   };
 
   return (
@@ -58,9 +28,9 @@ export default function DisplayMarkers({ coords, airlineIndex }) {
                 lat: +lat,
                 lng: +lng,
               }}
-              onMouseOver={() => handleInteraction(airlineDetails, "mouseover")}
-              onMouseOut={() => handleInteraction(airlineDetails, "mouseout")}
-              onClick={() => handleInteraction(airlineDetails, "click")}
+              onMouseOver={() => setSelectedMarker(airlineDetails)}
+              onMouseOut={() => setSelectedMarker(null)}
+              onClick={() => handleMarkerClick(airport)}
             >
               {selectedMarker === airlineDetails && (
                 <InfoWindow>
