@@ -1,9 +1,9 @@
 import HomeDescription from "./HomeDescription";
 
-const Hero = ({ loading }) => {
+const Hero = ({ isLoading }) => {
   return (
     <section id="hero">
-      <HomeDescription loading={loading} />
+      <HomeDescription isLoading={isLoading} />
     </section>
   );
 };

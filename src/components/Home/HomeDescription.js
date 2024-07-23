@@ -1,22 +1,21 @@
-import { Link, useLocation } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { ThreeDots } from "react-loader-spinner";
-import { useState, useEffect } from "react";
 
 const HomeDescription = ({ isLoading }) => {
   const [sending, setSending] = useState(false);
+  const navigate = useNavigate();
 
-  const location = useLocation();
+  const buttonClick = event => {
+    event.preventDefault();
+    setSending(true);
+    isLoading(true);
 
-  // useEffect(() => {
-  //   setSending(false); // Reset state when component mounts
-  // }, [location]); // Reset state when location (route) changes
-
-  const buttonClick = () => {
-    if (sending) {
-      setSending(true);
+    setTimeout(() => {
+      setSending(false);
       isLoading(false);
-    }
-    setSending(false);
+      navigate("/airlines");
+    }, 1000);
   };
 
   return (
@@ -29,12 +28,13 @@ const HomeDescription = ({ isLoading }) => {
       id="home-description-container"
       className="d-flex justify-content-center align-items-center"
     >
-      <div style={{ height: "100%" }} className="container">
+      <div style={{ height: "100%" }}>
         <div
           style={{
             display: "flex",
             height: "100%",
           }}
+          className="container"
         >
           <p
             style={{
@@ -50,10 +50,8 @@ const HomeDescription = ({ isLoading }) => {
             <span className=" w-100 home-description-button-container">
               <Link
                 className="btn btn-outline-dark mt-1 rounded-2 hero-btn d-flex justify-content-center align-items-center"
-                to="/airlines"
-                onClick={() => buttonClick()}
+                onClick={buttonClick}
               >
-                {/* shows three dot spinner when loading */}
                 {sending ? (
                   <ThreeDots
                     visible={true}
