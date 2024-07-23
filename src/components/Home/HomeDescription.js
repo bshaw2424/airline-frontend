@@ -1,6 +1,6 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { ThreeDots } from "react-loader-spinner";
-import { useState, useEffect, useLocation } from "react";
+import { useState, useEffect } from "react";
 
 const HomeDescription = ({ isLoading }) => {
   const [sending, isSending] = useState(false);
