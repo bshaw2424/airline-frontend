@@ -7,12 +7,12 @@ const HomeDescription = ({ isLoading }) => {
 
   const location = useLocation();
 
-  // useEffect(() => {
-  //   isSending(true); // Reset state when component mounts
-  // }, [location]); // Reset state when location (route) changes
+  useEffect(() => {
+    isSending(false); // Reset state when component mounts
+  }, [location]); // Reset state when location (route) changes
 
   const buttonClick = () => {
-    isSending(!sending ? true : false);
+    isSending(true);
     isLoading(false);
   };
 
