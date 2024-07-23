@@ -3,17 +3,20 @@ import { ThreeDots } from "react-loader-spinner";
 import { useState, useEffect } from "react";
 
 const HomeDescription = ({ isLoading }) => {
-  const [sending, isSending] = useState(false);
+  const [sending, setSending] = useState(false);
 
   const location = useLocation();
 
-  useEffect(() => {
-    isSending(false); // Reset state when component mounts
-  }, [location]); // Reset state when location (route) changes
+  // useEffect(() => {
+  //   setSending(false); // Reset state when component mounts
+  // }, [location]); // Reset state when location (route) changes
 
   const buttonClick = () => {
-    isSending(true);
-    isLoading(false);
+    if (sending) {
+      setSending(true);
+      isLoading(false);
+    }
+    setSending(false);
   };
 
   return (
@@ -24,9 +27,9 @@ const HomeDescription = ({ isLoading }) => {
         marginBottom: "1rem",
       }}
       id="home-description-container"
-      className="container d-flex justify-content-center align-items-center"
+      className="d-flex justify-content-center align-items-center"
     >
-      <div style={{ height: "100%" }}>
+      <div style={{ height: "100%" }} className="container">
         <div
           style={{
             display: "flex",
