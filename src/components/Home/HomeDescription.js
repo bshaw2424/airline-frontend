@@ -1,9 +1,15 @@
 import { Link } from "react-router-dom";
 import { ThreeDots } from "react-loader-spinner";
-import { useState } from "react";
+import { useState, useEffect, useLocation } from "react";
 
 const HomeDescription = ({ isLoading }) => {
   const [sending, isSending] = useState(false);
+
+  const location = useLocation();
+
+  useEffect(() => {
+    isSending(false); // Reset state when component mounts
+  }, [location]); // Reset state when location (route) changes
 
   const buttonClick = () => {
     isSending(true);
