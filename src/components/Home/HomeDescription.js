@@ -15,7 +15,7 @@ const HomeDescription = ({ isLoading }) => {
       setSending(false);
       isLoading(false);
       navigate("/airlines");
-    }, 1000);
+    }, 1200);
   };
 
   return (
@@ -69,6 +69,7 @@ const HomeDescription = ({ isLoading }) => {
               </Link>
             </span>
           </p>
+
           <div
             className="image-container"
             style={{
