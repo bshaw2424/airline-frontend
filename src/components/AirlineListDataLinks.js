@@ -1,5 +1,5 @@
 import { useState } from "react";
-import AirlineDataModal from "./AirlineDataModal";
+// import AirlineDataModal from "./AirlineDataModal";
 import { Link } from "react-router-dom";
 import ThumbsUpIcon from "./ThumbsUpIcon";
 
@@ -77,7 +77,7 @@ export default function AirlineListDataLinks({ airlineNameData, icons }) {
               id={`airlineModalData-${airline._id}`}
             /> */}
             <Link
-              className="btn btn-outline-dark w-100"
+              className="btn btn-outline-dark w-100 mb-3"
               to={`/airlines/${airline.slug}/destinations`}
             >
               View Destinations
