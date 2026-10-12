@@ -1,9 +1,11 @@
 import HomeDescription from "./HomeDescription";
+import HomeSearch from "../Search/HomeSearch"
 
-const Hero = ({ isLoading }) => {
+const Hero = () => {
   return (
-    <section id="hero">
-      <HomeDescription isLoading={isLoading} />
+    <section id="hero" className="container">
+      <HomeDescription />
+      <HomeSearch />
     </section>
   );
 };

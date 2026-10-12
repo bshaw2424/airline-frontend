@@ -23,7 +23,7 @@ export default function Home() {
       <main>
         {isLoading ? (
           <>
-            <Hero isLoading={setIsLoading} />
+            <Hero />
             <FeaturedAirlines airlineNames={getAirlineNames} />
             <AirlineFeatureDescription />
           </>

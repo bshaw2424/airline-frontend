@@ -46,7 +46,7 @@ export default function NavRoot() {
                   Home
                 </NavLink>
               </li>
-              <li className="nav-item">
+              {/* <li className="nav-item">
                 <NavLink
                   to="/airlines"
                   className="nav-link"
@@ -54,7 +54,7 @@ export default function NavRoot() {
                 >
                   Airlines
                 </NavLink>
-              </li>
+              </li> */}
               <li className="nav-item">
                 <NavLink
                   to="/about"
