@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { FaSearch, FaPlus, FaCheck } from "react-icons/fa";
 import api from "../api/axios";
@@ -185,4 +184,3 @@ export default function DestinationSearch({
     </div>
   );
 }
-
