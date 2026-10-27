@@ -31,15 +31,14 @@ export default function TripDetails() {
 
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState("");
 
-  // Flexible destination state
   const [destination, setDestination] = useState(initialDestination);
   const [addingDestination, setAddingDestination] = useState(false);
   const [removingDestination, setRemovingDestination] = useState(null);
   const [destinationError, setDestinationError] = useState("");
+  const [reorderingStops, setReorderingStops] = useState(false);
 
   const handleTripUpdated = updatedTrip => {
     setTrip(updatedTrip);
@@ -57,25 +56,46 @@ export default function TripDetails() {
     setDestinationError("");
   };
 
-  // Populate the form when an airport is selected from search
-  const handleSelectAirport = selectedAirport => {
-    setDestination({
-      name: selectedAirport.airport_name || selectedAirport.name || "",
-      type: "airport",
-      city: selectedAirport.city || "",
-      state: selectedAirport.state || "",
-      country: "",
-      airportCode: selectedAirport.airport_code || "",
-    });
+  const handleAddSelectedAirport = async selectedAirport => {
+    if (addingDestination || removingDestination !== null || reorderingStops) {
+      return;
+    }
 
+    setAddingDestination(true);
     setDestinationError("");
+
+    try {
+      const response = await api.post(`/api/trips/${id}/stops`, {
+        name:
+          selectedAirport.airport_name ||
+          selectedAirport.name ||
+          selectedAirport.city,
+        type: "airport",
+        city: selectedAirport.city || "",
+        state: selectedAirport.state || "",
+        country: "",
+        airportCode: selectedAirport.airport_code || "",
+      });
+
+      setTrip(response.data.trip);
+    } catch (error) {
+      console.error("Unable to add selected airport:", error);
+
+      setDestinationError(
+        error.response?.data?.message ||
+          error.response?.data?.error ||
+          "Unable to add airport. Please try again.",
+      );
+    } finally {
+      setAddingDestination(false);
+    }
   };
 
-  // Add a flexible destination
   const handleAddDestination = async e => {
     e.preventDefault();
 
-    if (addingDestination || removingDestination !== null) return;
+    if (addingDestination || removingDestination !== null || reorderingStops)
+      return;
 
     const name = destination.name.trim();
 
@@ -121,7 +141,54 @@ export default function TripDetails() {
     }
   };
 
-  // Remove a flexible destination
+  const handleMoveStop = async (stopId, direction) => {
+    if (reorderingStops || addingDestination || removingDestination !== null) {
+      return;
+    }
+
+    const sortedStops = [...(trip.tripStops || [])].sort(
+      (a, b) => a.order - b.order,
+    );
+
+    const currentIndex = sortedStops.findIndex(stop => stop._id === stopId);
+    const targetIndex = currentIndex + direction;
+
+    if (
+      currentIndex === -1 ||
+      targetIndex < 0 ||
+      targetIndex >= sortedStops.length
+    ) {
+      return;
+    }
+
+    [sortedStops[currentIndex], sortedStops[targetIndex]] = [
+      sortedStops[targetIndex],
+      sortedStops[currentIndex],
+    ];
+
+    const stopIds = sortedStops.map(stop => stop._id);
+
+    setReorderingStops(true);
+    setDestinationError("");
+
+    try {
+      const response = await api.put(`/api/trips/${id}/stops/reorder`, {
+        stopIds,
+      });
+
+      setTrip(response.data.trip);
+    } catch (error) {
+      console.error("Unable to reorder destinations:", error);
+      setDestinationError(
+        error.response?.data?.message ||
+          error.response?.data?.error ||
+          "Unable to reorder destinations. Please try again.",
+      );
+    } finally {
+      setReorderingStops(false);
+    }
+  };
+
   const handleRemoveStop = async stopId => {
     if (removingDestination !== null || addingDestination) return;
 
@@ -145,7 +212,6 @@ export default function TripDetails() {
     }
   };
 
-  // Remove a legacy airport-code destination
   const handleRemoveLegacyDestination = async code => {
     if (removingDestination !== null || addingDestination) return;
 
@@ -171,7 +237,6 @@ export default function TripDetails() {
     }
   };
 
-  // Delete trip
   const handleDeleteTrip = async () => {
     if (deleting) return;
 
@@ -195,7 +260,6 @@ export default function TripDetails() {
     }
   };
 
-  // Fetch trip details
   useEffect(() => {
     const controller = new AbortController();
 
@@ -258,9 +322,45 @@ export default function TripDetails() {
   const tripStops = trip.tripStops || [];
   const legacyDestinations = trip.destinations || [];
 
-  const destinationCount = tripStops.length + legacyDestinations.length;
+  // Identify legacy airport codes already represented
+  // by flexible trip stops.
+  const migratedAirportCodes = new Set(
+    tripStops
+      .map(stop => stop.airportCode?.trim().toUpperCase())
+      .filter(Boolean),
+  );
 
-  const isDestinationBusy = addingDestination || removingDestination !== null;
+  // Only display legacy destinations that have not
+  // already been migrated into tripStops.
+  const remainingLegacyDestinations = legacyDestinations.filter(
+    code => !migratedAirportCodes.has(code.trim().toUpperCase()),
+  );
+
+  // Build one itinerary containing flexible stops
+  // and any remaining legacy destinations.
+  const itineraryStops = [
+    ...tripStops
+      .map(stop => ({
+        ...stop,
+        id: stop._id,
+        isLegacy: false,
+      }))
+      .sort((a, b) => a.order - b.order),
+
+    ...remainingLegacyDestinations.map(code => ({
+      id: `legacy-${code}`,
+      name: code,
+      type: "airport",
+      airportCode: code,
+      isLegacy: true,
+    })),
+  ];
+
+  // Count only destinations actually displayed.
+  const destinationCount = itineraryStops.length;
+
+  const isDestinationBusy =
+    addingDestination || removingDestination !== null || reorderingStops;
 
   return (
     <main className="container py-4">
@@ -269,6 +369,33 @@ export default function TripDetails() {
       </Link>
 
       <section className="border rounded-3 p-4">
+        {/* Scenic trip cover image */}
+        <div
+          className="rounded-3 overflow-hidden mb-4"
+          style={{
+            height: "clamp(200px, 35vw, 360px)",
+            background:
+              "linear-gradient(135deg, #0d6e7a 0%, #198f9c 55%, #79c9c5 100%)",
+          }}
+        >
+          {trip.coverImage ? (
+            <img
+              src={trip.coverImage}
+              alt={`${trip.name} cover`}
+              className="w-100 h-100"
+              style={{ objectFit: "cover" }}
+            />
+          ) : (
+            <div className="d-flex flex-column justify-content-center align-items-center h-100 text-white text-center p-3">
+              <span aria-hidden="true" style={{ fontSize: "3rem" }}>
+                ✈️
+              </span>
+              <h2 className="h4 fw-bold mt-2 mb-1">Your Next Adventure</h2>
+              <p className="mb-0">Start exploring your destinations</p>
+            </div>
+          )}
+        </div>
+
         {/* Trip heading and actions */}
         <div className="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-3">
           <h1 className="fw-bold mb-0">{trip.name}</h1>
@@ -386,7 +513,7 @@ export default function TripDetails() {
           <div className="mb-4">
             <DestinationSearch
               mode="trip"
-              onSelect={handleSelectAirport}
+              onSelect={handleAddSelectedAirport}
               disabled={isDestinationBusy}
             />
           </div>
@@ -532,16 +659,16 @@ export default function TripDetails() {
             </p>
           )}
 
-          {/* Display flexible and legacy destinations */}
+          {/* Unified itinerary display */}
           {destinationCount === 0 ? (
             <p className="text-muted">
               No destinations added to this trip yet.
             </p>
           ) : (
             <ul className="list-group">
-              {tripStops.map(stop => (
+              {itineraryStops.map((stop, index) => (
                 <li
-                  key={stop._id}
+                  key={stop.id}
                   className="list-group-item d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3"
                 >
                   <div>
@@ -567,45 +694,62 @@ export default function TripDetails() {
                           {stop.airportCode}
                         </span>
                       )}
+
+                      {stop.isLegacy && (
+                        <span>
+                          {" · "}
+                          Previously saved destination
+                        </span>
+                      )}
                     </div>
                   </div>
 
-                  <button
-                    type="button"
-                    className="btn btn-outline-danger btn-sm"
-                    onClick={() => handleRemoveStop(stop._id)}
-                    disabled={isDestinationBusy}
-                    aria-label={`Remove ${stop.name} from trip`}
-                  >
-                    {removingDestination === stop._id
-                      ? "Removing..."
-                      : "Remove"}
-                  </button>
-                </li>
-              ))}
+                  <div className="d-flex flex-wrap align-items-center gap-2">
+                    {!stop.isLegacy && (
+                      <>
+                        <button
+                          type="button"
+                          className="btn btn-outline-secondary btn-sm"
+                          onClick={() => handleMoveStop(stop.id, -1)}
+                          disabled={isDestinationBusy || index === 0}
+                          aria-label={`Move ${stop.name} up`}
+                          title="Move up"
+                        >
+                          ↑
+                        </button>
 
-              {legacyDestinations.map(code => (
-                <li
-                  key={`legacy-${code}`}
-                  className="list-group-item d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3"
-                >
-                  <div>
-                    <div className="fw-semibold">📍 {code}</div>
+                        <button
+                          type="button"
+                          className="btn btn-outline-secondary btn-sm"
+                          onClick={() => handleMoveStop(stop.id, 1)}
+                          disabled={
+                            isDestinationBusy || index === tripStops.length - 1
+                          }
+                          aria-label={`Move ${stop.name} down`}
+                          title="Move down"
+                        >
+                          ↓
+                        </button>
+                      </>
+                    )}
 
-                    <div className="text-muted small">
-                      Airport · Previously saved destination
-                    </div>
+                    <button
+                      type="button"
+                      className="btn btn-outline-danger btn-sm"
+                      onClick={() =>
+                        stop.isLegacy
+                          ? handleRemoveLegacyDestination(stop.airportCode)
+                          : handleRemoveStop(stop.id)
+                      }
+                      disabled={isDestinationBusy}
+                      aria-label={`Remove ${stop.name} from trip`}
+                    >
+                      {removingDestination ===
+                      (stop.isLegacy ? stop.airportCode : stop.id)
+                        ? "Removing..."
+                        : "Remove"}
+                    </button>
                   </div>
-
-                  <button
-                    type="button"
-                    className="btn btn-outline-danger btn-sm"
-                    onClick={() => handleRemoveLegacyDestination(code)}
-                    disabled={isDestinationBusy}
-                    aria-label={`Remove ${code} from trip`}
-                  >
-                    {removingDestination === code ? "Removing..." : "Remove"}
-                  </button>
                 </li>
               ))}
             </ul>

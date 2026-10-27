@@ -7,6 +7,7 @@ export default function EditTrip({ trip, onTripUpdated }) {
     startDate: trip.startDate?.slice(0, 10) || "",
     endDate: trip.endDate?.slice(0, 10) || "",
     notes: trip.notes || "",
+    coverImage: trip.coverImage || "",
   });
 
   const [saving, setSaving] = useState(false);
@@ -29,6 +30,7 @@ export default function EditTrip({ trip, onTripUpdated }) {
     if (saving) return;
 
     const name = formData.name.trim();
+    const coverImage = formData.coverImage.trim();
 
     if (!name) {
       setError("Please enter a trip name.");
@@ -44,6 +46,20 @@ export default function EditTrip({ trip, onTripUpdated }) {
       return;
     }
 
+    if (coverImage) {
+      try {
+        const imageUrl = new URL(coverImage);
+
+        if (!["https:", "http:"].includes(imageUrl.protocol)) {
+          setError("Cover image must use HTTP or HTTPS.");
+          return;
+        }
+      } catch {
+        setError("Please enter a valid cover image URL.");
+        return;
+      }
+    }
+
     setSaving(true);
     setError("");
 
@@ -53,6 +69,7 @@ export default function EditTrip({ trip, onTripUpdated }) {
         startDate: formData.startDate || null,
         endDate: formData.endDate || null,
         notes: formData.notes.trim(),
+        coverImage,
       });
 
       onTripUpdated?.(response.data.trip);
@@ -119,6 +136,44 @@ export default function EditTrip({ trip, onTripUpdated }) {
             disabled={saving}
           />
         </div>
+      </div>
+
+      {/* Trip cover image */}
+      <div className="mb-3">
+        <label htmlFor="editTripCoverImage" className="form-label">
+          Cover Image URL (Optional)
+        </label>
+
+        <input
+          type="url"
+          id="editTripCoverImage"
+          name="coverImage"
+          className="form-control"
+          placeholder="https://example.com/travel-photo.jpg"
+          value={formData.coverImage}
+          onChange={handleChange}
+          maxLength={2048}
+          disabled={saving}
+        />
+
+        <div className="form-text">
+          Enter a direct image URL. Leave blank to remove the cover image.
+        </div>
+
+        {formData.coverImage.trim() && (
+          <div className="mt-3">
+            <img
+              src={formData.coverImage.trim()}
+              alt="Trip cover preview"
+              className="img-fluid rounded-3"
+              style={{
+                width: "100%",
+                maxHeight: "220px",
+                objectFit: "cover",
+              }}
+            />
+          </div>
+        )}
       </div>
 
       <div className="mb-3">
