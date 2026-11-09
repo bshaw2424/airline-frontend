@@ -1,13 +1,77 @@
+/* Explore Airlines — Responsive Grid */
 .airline-divs {
-  margin-left: 0;
-  margin-right: 0;
   display: grid;
-  grid-template-columns: repeat(2, auto);
-  justify-items: center;
-  width: 80%;
-  margin: auto;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
 }
 
+/* Tablet */
+@media (min-width: 576px) {
+  .airline-divs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Desktop */
+@media (min-width: 992px) {
+  .airline-divs {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+/* Explore Airlines — Airline Cards */
+.airline-divs .airlineNameLink {
+  width: 100%;
+  min-width: 0;
+  padding: 1.5rem;
+  background-color: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px !important;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.airline-divs .airlineNameLink:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
+}
+
+.airline-divs .airlineNameLink h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1e293b;
+  line-height: 1.4;
+}
+
+.airline-divs .airlineNameLink p {
+  color: #475569;
+  overflow-wrap: anywhere;
+}
+
+.airline-divs .airlineNameLink .btn {
+  border-radius: 8px;
+  font-weight: 500;
+  padding: 0.75rem 1rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .airline-divs .airlineNameLink {
+    transition: none;
+  }
+
+  .airline-divs .airlineNameLink:hover {
+    transform: none;
+  }
+}
+
+/* -----------------------------------------
+          li
+-------------------------------------------- */
 li {
   cursor: pointer;
   margin-bottom: 0.5rem;
@@ -21,10 +85,6 @@ button[type="button"] .gm-ui-hover-effect {
   display: none;
   height: 20rem;
   width: 40rem;
-}
-
-.airline-border {
-  border: 1px solid #d3d3d3;
 }
 
 @media screen and (max-width: 576px) {
@@ -61,11 +121,14 @@ button[type="button"] .gm-ui-hover-effect {
     display: flex;
     flex-direction: column;
   }
-  #featured .container h1 {
-    border-bottom: 1px solid #fff;
-    font-size: 3rem;
+
+  #featured .container h2 {
+    font-size: clamp(1.75rem, 3vw, 2.25rem);
+    font-weight: 700;
+    color: #1e3a5f;
     padding-bottom: 1rem;
   }
+
   #featured .container .airline-names div ul {
     display: grid;
     grid-template-columns: repeat(1, 1fr);
@@ -89,6 +152,43 @@ button[type="button"] .gm-ui-hover-effect {
   #feature-description .container .airline-feature:last-child {
     margin-bottom: 0;
   }
+  .notification-img {
+    display: none;
+  }
+}
+
+/* ------------------------------------------
+   FEATURED AIRLINES CARDS
+   ------------------------------------------ */
+
+.featured-airline-card {
+  background-color: #ffffff;
+  border-color: #e2e8f0 !important;
+  border-radius: 12px !important;
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.featured-airline-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12) !important;
+}
+
+.featured-airline-card:focus-visible {
+  outline: 3px solid #2563eb;
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .featured-airline-card {
+    transition: none;
+  }
+
+  .featured-airline-card:hover {
+    transform: none;
+  }
 }
 @media screen and (min-width: 768px) {
   #featured .container {
@@ -110,10 +210,10 @@ button[type="button"] .gm-ui-hover-effect {
     padding: 0;
     background: white;
   }
-  /* #home-description-container div {
+  #home-description-container div {
     display: flex;
     flex-direction: row;
-  } */
+  }
   #home-description-container div .image-container {
     display: block;
   }
@@ -124,7 +224,7 @@ button[type="button"] .gm-ui-hover-effect {
   }
   #home-description-container .home-description-button-container {
     display: flex;
-    justify-content: end;
+    justify-content: flex-end;
     margin-top: 1rem;
   }
   #home-description-container .home-description-button-container .hero-btn {
@@ -135,34 +235,28 @@ button[type="button"] .gm-ui-hover-effect {
   .hero-icon {
     display: none;
   }
-  /* #featured .container {
+  #featured .container {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-  } */
-  /* #featured .container h1 {
+  }
+  #featured .container h1 {
     border: 0;
     border-right: 1px solid #fff;
     padding-right: 1rem;
     padding-top: 1rem;
-  } */
-  #featured .container .airline-names div {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-
-    -moz-column-gap: 1rem;
-    column-gap: 1rem;
-    /* border: 1px solid black; */
   }
-  #featured .container .airline-names div span {
+  #featured .container .airline-names div ul {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    padding: 0 0 1rem 1.5rem;
+    column-gap: 1rem;
+  }
+  #featured .container .airline-names div ul li {
     list-style-type: none;
     font-size: 1.3rem;
     cursor: default;
-    margin: 1rem 0;
-
-    padding: 1.2rem 1.7rem;
-    text-align: center;
   }
   #feature-description .container {
     display: flex;
@@ -234,11 +328,6 @@ form {
     font-size: 1.2rem;
   }
 }
-#display-title {
-  padding: 0;
-  padding-top: 1rem;
-}
-
 @media screen and (min-width: 344px) {
   #display-title h1 {
     font-size: 2rem;
@@ -273,6 +362,168 @@ form {
     padding: 0.75rem 0;
   }
 }
+/* Search Results */
+.search-results__button {
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.search-results__button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1) !important;
+}
+
+.search-results__button:focus-visible {
+  outline: 3px solid #0d6efd;
+  outline-offset: 3px;
+}
+
+.search-results__logo {
+  width: 100%;
+  max-width: 180px;
+  height: 110px;
+  object-fit: contain;
+}
+
+/* ------------------------------------------
+   AIRLINE DRAWER
+--------------------------------------------- */
+
+/* Airport cards */
+.airline-drawer__item {
+  background-color: #fff;
+  transition: background-color 0.2s ease;
+}
+
+.airline-drawer__item:hover {
+  background-color: #f8f9fa;
+}
+
+/* Mobile airport list - smooth expansion */
+@media (max-width: 767.98px) {
+  .airline-drawer__expandable {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    visibility: hidden;
+
+    transition:
+      grid-template-rows 400ms ease,
+      opacity 300ms ease,
+      visibility 400ms;
+  }
+
+  .airline-drawer__expandable.is-open {
+    grid-template-rows: 1fr;
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .airline-drawer__expandable-inner {
+    min-height: 0;
+    overflow: hidden;
+  }
+}
+
+/* Accessibility - reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .airline-drawer__expandable {
+    transition: none;
+  }
+}
+
+/* ------------------------------------------
+   MOBILE SEARCH RESULTS
+--------------------------------------------- */
+
+@media (max-width: 575.98px) {
+  .search-results__logo {
+    max-width: 150px;
+    height: 85px;
+  }
+
+  .search-results__button {
+    padding: 1rem !important;
+  }
+}
+
+/* No Search Results */
+
+.no-search-results {
+  max-width: 650px;
+  background: #ffffff;
+  border: 1px solid #dbeafe;
+  border-radius: 18px;
+  box-shadow: 0 8px 24px rgba(30, 58, 95, 0.07);
+}
+
+.no-search-results__icon {
+  width: 76px;
+  height: 76px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #eff6ff;
+  color: #3b82f6;
+  font-size: 32px;
+}
+
+.no-search-results h2 {
+  color: #1e3a5f;
+}
+
+/* ------------------------------------------
+   ACCESSIBILITY - REDUCED MOTION
+--------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .search-results__button,
+  .airline-drawer__item {
+    transition: none;
+  }
+
+  .search-results__button:hover {
+    transform: none;
+  }
+}
+
+.home-hero {
+  padding: 3rem 0;
+  background-color: #f8fafc;
+}
+.home-hero__layout {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+.home-hero__main {
+  width: 100%;
+  min-width: 0;
+}
+.home-hero__description {
+  max-width: 750px;
+  margin: 0 auto 2rem;
+  text-align: center;
+}
+.home-hero__title {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  line-height: 1.15;
+}
+.home-hero__subtitle {
+  font-size: clamp(1rem, 1.5vw, 1.25rem);
+  line-height: 1.6;
+  color: #64748b;
+}
+
+@media (min-width: 992px) {
+  .home-hero {
+    padding: 5rem 0;
+  }
+}
 h1,
 h2,
 h3,
@@ -293,9 +544,6 @@ a {
   text-decoration: none;
   color: #333;
 }
-a:hover {
-  color: blue;
-}
 
 .width {
   width: 100%;
@@ -309,6 +557,519 @@ ul li {
   outline: 1px solid #333;
 }
 
-.nav-item:hover {
-  border-bottom: 1px solid #333;
-} /*# sourceMappingURL=App.css.map */
+/* ------------------------------------------
+            Navigation
+--------------------------------------------- */
+.nav-root__brand-wrapper {
+  width: 100%;
+}
+
+@media (min-width: 992px) {
+  .nav-root__brand-wrapper {
+    width: auto;
+  }
+}
+
+/* Mobile navbar spacing */
+@media (max-width: 991.98px) {
+  .nav-root__brand-wrapper {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+/* ------------------------------------------
+   22B — HERO SECTION
+   ------------------------------------------ */
+
+/* ------------------------------------------
+   HERO BACKGROUND — LIGHT DESIGN
+   ------------------------------------------ */
+
+.home-hero {
+  padding: 3rem 0;
+
+  background: linear-gradient(135deg, #f8fbff 0%, #eaf4ff 55%, #f0f9ff 100%);
+}
+/* ------------------------------------------
+   HERO LAYOUT
+   ------------------------------------------ */
+
+.home-hero__layout {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.home-hero__main,
+.home-hero__actions {
+  width: 100%;
+  min-width: 0;
+}
+
+/* ------------------------------------------
+   HERO HEADING & DESCRIPTION
+   ------------------------------------------ */
+
+.home-hero__description {
+  max-width: 750px;
+  margin: 0 auto 2rem;
+  text-align: center;
+}
+
+.home-hero__title {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  line-height: 1.15;
+  font-weight: 700;
+  color: #1e3a5f;
+}
+
+.home-hero__subtitle {
+  font-size: clamp(1rem, 1.5vw, 1.25rem);
+  line-height: 1.6;
+  color: #475569;
+}
+/* ------------------------------------------
+   HERO SEARCH FORM
+   ------------------------------------------ */
+
+.home-hero .home-search-form {
+  background-color: rgba(255, 255, 255, 0.96);
+  color: #1e293b;
+  max-width: 850px;
+  margin: 0 auto;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 16px !important;
+  box-shadow: 0 12px 35px rgba(15, 23, 42, 0.18) !important;
+}
+
+.home-hero .home-search-form h2 {
+  color: #1e293b;
+  font-size: 1.25rem;
+  line-height: 1.4;
+}
+
+.home-hero .home-search-form .form-label {
+  color: #475569;
+  font-weight: 500;
+}
+
+.home-hero .home-search-form .form-control {
+  min-height: 48px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+}
+
+.home-hero .home-search-form .form-control:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.home-hero .home-search-form__actions .btn {
+  min-height: 44px;
+  padding: 0.625rem 1.5rem;
+  font-weight: 500;
+}
+
+/* Homepage search action buttons */
+.home-hero .home-search-form__actions {
+  justify-content: center;
+}
+
+/* Mobile: full-width buttons */
+.home-hero .home-search-form__actions .btn {
+  width: 100%;
+}
+
+/* Suggested destination searches */
+.home-search-form__chip {
+  background-color: #e0efff;
+  color: #1e3a5f;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 0.4rem 0.9rem;
+  font-weight: 500;
+
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.home-search-form__chip:hover {
+  background-color: #c7e2ff;
+  color: #12345b;
+  transform: translateY(-2px);
+}
+
+.home-search-form__chip:focus-visible {
+  outline: 3px solid #2563eb;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-search-form__chip {
+    transition: none;
+  }
+
+  .home-search-form__chip:hover {
+    transform: none;
+  }
+}
+
+/* ------------------------------------------
+   HERO ACTION CARDS
+   ------------------------------------------ */
+
+.home-hero__actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+  width: 100%;
+}
+
+/* Tablet: Two columns */
+@media (min-width: 768px) {
+  .home-hero__actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Desktop: Three columns */
+@media (min-width: 992px) {
+  .home-hero__actions {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+}
+
+.home-hero__action-card {
+  display: flex;
+  align-items: flex-end;
+  position: relative;
+  overflow: hidden;
+  min-height: 220px;
+  padding: 1.5rem;
+  background-color: rgba(15, 23, 42, 0.75);
+  color: #ffffff;
+  text-decoration: none;
+  border-radius: 12px;
+
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.home-hero__action-card:hover {
+  transform: translateY(-3px);
+  background-color: rgba(15, 23, 42, 0.9);
+  color: #ffffff;
+}
+
+.home-hero__action-card:focus-visible {
+  outline: 3px solid #ffffff;
+  outline-offset: 3px;
+}
+
+.home-hero__action-content h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #ffffff;
+}
+
+.home-hero__action-content p {
+  font-size: 0.9rem;
+  margin-bottom: 0;
+  opacity: 0.9;
+}
+
+/* Explore Destinations photographic card */
+.home-hero__action-card:first-child {
+  background-image:
+    linear-gradient(to top, rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.1)),
+    url("/public/explore-destinations-card.jpg");
+
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* Tablet: make Plan Your Trips span both columns */
+@media (min-width: 768px) and (max-width: 991.98px) {
+  .home-hero__action-card:last-child {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Explore Airlines photographic card */
+.home-hero__action-card:nth-child(2) {
+  background-image:
+    linear-gradient(to top, rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.1)),
+    url("/public/explore-airlines-card.jpg");
+
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* Plan Your Trips photographic card */
+.home-hero__action-card:nth-child(3) {
+  background-image:
+    linear-gradient(to top, rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.1)),
+    url("/public/plan-trips-card.jpg");
+
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* ------------------------------------------
+   HERO RESPONSIVE STYLES
+   ------------------------------------------ */
+
+@media (min-width: 992px) {
+  .home-hero {
+    padding: 5rem 0;
+  }
+
+  .home-hero__layout {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+  }
+
+  .home-hero__description {
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+/* ------------------------------------------
+   AIRPORT SECURITY TIPS
+ ------------------------------------------- */
+.airline-feature__title {
+  font-size: clamp(1.75rem, 3vw, 2.25rem);
+  font-weight: 700;
+  color: #1e3a5f;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.airline-feature__description {
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  line-height: 1.7;
+  color: #475569;
+  max-width: 800px;
+  margin-bottom: 1.5rem;
+}
+
+/* Airport Security Tips Button */
+
+.airline-feature__button {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background-color: #2563eb;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 600;
+  border: 1px solid #2563eb;
+  border-radius: 10px;
+  transition:
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.airline-feature__button:hover {
+  background-color: #1d4ed8;
+  border-color: #1d4ed8;
+  color: #ffffff;
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.2);
+}
+
+.airline-feature__button:focus-visible {
+  outline: 3px solid #1e3a5f;
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .airline-feature__button {
+    transition: none;
+  }
+}
+
+/* ------------------------------------------
+   ACCESSIBILITY
+   ------------------------------------------ */
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .home-hero__action-card {
+    transition: none;
+  }
+
+  .home-hero__action-card:hover {
+    transform: none;
+  }
+}
+
+/* ------------------------------------------
+   EXPLORE DESTINATIONS PAGE
+   ------------------------------------------ */
+
+.home-search {
+  width: 100%;
+  max-width: 850px;
+  margin: 0 auto;
+}
+
+.explore-destinations {
+  background: linear-gradient(135deg, #f8fbff 0%, #eaf4ff 55%, #f0f9ff 100%);
+  min-height: 70vh;
+}
+
+/* Explore Destinations Search Form */
+
+.explore-destinations .home-search-form {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 16px !important;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08) !important;
+}
+
+.explore-destinations .home-search-form h2 {
+  color: #1e3a5f;
+}
+
+.explore-destinations .home-search-form .form-control {
+  min-height: 48px;
+  border-radius: 8px;
+}
+
+.explore-destinations .home-search-form__actions .btn {
+  min-height: 48px;
+  white-space: nowrap;
+}
+
+/* Mobile and tablet */
+@media (max-width: 991.98px) {
+  .explore-destinations .home-search-form__actions .btn {
+    width: 100%;
+  }
+}
+
+/* ------------------------------------------
+   EXPLORE AIRLINES
+--------------------------------------------- */
+
+/* Explore Airlines Hero */
+
+.explore-airlines__hero {
+  min-height: 360px;
+  background-image:
+    linear-gradient(rgba(15, 23, 42, 0.35), rgba(15, 23, 42, 0.65)),
+    url("/public/explore-airlines-hero.jpg");
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.explore-airlines__hero-overlay {
+  width: 100%;
+  padding: 80px 20px;
+}
+
+.explore-airlines__title {
+  color: #ffffff;
+  font-size: clamp(2.25rem, 5vw, 4rem);
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+}
+
+.explore-airlines__subtitle {
+  color: #f1f5f9;
+  max-width: 650px;
+  margin: 0 auto;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Explore Airlines — Logo Cards */
+.explore-airlines {
+  background-color: #f4f8fd;
+}
+
+.explore-airlines__card {
+  min-height: 290px;
+  border-color: #dbe7f5 !important;
+  border-radius: 16px !important;
+  box-shadow: 0 4px 14px rgba(30, 58, 95, 0.06) !important;
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.explore-airlines__card:hover {
+  transform: translateY(-4px);
+  border-color: #93c5fd !important;
+  box-shadow: 0 12px 28px rgba(30, 58, 95, 0.12) !important;
+}
+
+.explore-airlines__card h3 {
+  color: #1e3a5f;
+  line-height: 1.4;
+}
+
+.explore-airlines__card .btn {
+  min-height: 44px;
+  padding: 0.65rem 1rem;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.explore-airlines__card .btn:focus-visible {
+  outline: 3px solid #2563eb;
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .explore-airlines__card {
+    transition: none;
+  }
+
+  .explore-airlines__card:hover {
+    transform: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .explore-airlines__hero {
+    min-height: 280px;
+  }
+
+  .explore-airlines__hero-overlay {
+    padding: 60px 16px;
+  }
+}
+
+/* ------------------------------------------
+   POPULAR DESTINATIONS
+--------------------------------------------- */
+
+.popular-destinations__image-wrapper {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background-color: #e2e8f0;
+}
+
+.popular-destinations__image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/*# sourceMappingURL=App.css.map */

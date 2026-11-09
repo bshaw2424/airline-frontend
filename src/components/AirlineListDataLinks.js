@@ -1,15 +1,5 @@
-import { useState } from "react";
-// import AirlineDataModal from "./AirlineDataModal";
 import { Link } from "react-router-dom";
 import ThumbsUpIcon from "./ThumbsUpIcon";
-
-const styles = {
-  width: "96%",
-  padding: "1rem",
-  position: "relative",
-  cursor: "pointer",
-  background: "#fff",
-};
 
 const airlineCodes = {
   "Alaska Airlines": "AS",
@@ -29,21 +19,13 @@ const getAirlineCode = airlineName => {
 };
 
 export default function AirlineListDataLinks({ airlineNameData, icons }) {
-  const [hoveredIndex, setHoveredIndex] = useState(null);
-
-  // const handleMouseEnter = index => setHoveredIndex(index);
-
-  // const handleMouseLeave = () => setHoveredIndex(null);
-
   return (
     <section>
       <div className="airline-divs mb-0">
         {airlineNameData.map((airline, index) => (
           <div
-            style={styles}
             key={`${airline.name}-${index}`}
-            className={`Links mb-4 rounded airlineNameLink 
-              ${hoveredIndex === index ? "shadow" : "airline-border "}
+            className={`Links mb-4 rounded airlineNameLink
               Link-${index + 1} py-2`}
             data-bs-toggle="modal"
             data-bs-target={`#airlineModalData-${airline._id}`}
@@ -65,10 +47,12 @@ export default function AirlineListDataLinks({ airlineNameData, icons }) {
                 {airline.website}
               </Link>
             </p>
-            <p>
-              <strong>Total Destinations:</strong> {airline.destinations.length}
-              <span>{airline.estinations}</span>
-            </p>
+            <div>
+              <p>
+                <strong>Total Destinations:</strong>{" "}
+                {airline.destinations.length}
+              </p>
+            </div>
 
             {/* displays thumbs up icons with valid airport code look up */}
             {icons[index] && <ThumbsUpIcon />}

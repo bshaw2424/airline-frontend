@@ -139,6 +139,29 @@ export const findMatches = (destinations, query) => {
   return null;
 };
 
+export const findLiveMatches = (destinations, query) => {
+  const normalizedQuery = normalize(query);
+
+  if (normalizedQuery.length < 2) {
+    return [];
+  }
+
+  return destinations.filter(destination => {
+    const fields = [
+      destination.airport_code,
+      destination.airport_name,
+      destination.city,
+      destination.name,
+      destination.state,
+      destination.country,
+    ];
+
+    return fields.some(field =>
+      normalize(field).includes(normalizedQuery),
+    );
+  });
+};
+
 export const groupMatchesByAirline = matches => {
   const airlineMap = new Map();
 

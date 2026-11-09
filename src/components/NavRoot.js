@@ -71,7 +71,7 @@ export default function NavRoot() {
           style={{ position: "relative", zIndex: 4 }}
         >
           <nav className="container navbar navbar-expand-lg py-2">
-            <div className="container-fluid">
+            <div className="nav-root__brand-wrapper d-flex align-items-center justify-content-between">
               <h1 className="nav-brand mb-0">
                 <Link to="/" onClick={handleNavLinkClick}>
                   Flight In Range
@@ -126,7 +126,7 @@ export default function NavRoot() {
               </ul>
 
               {/* Authentication navigation */}
-              <ul className="navbar-nav ps-3 align-items-lg-center gap-lg-2">
+              <ul className="navbar-nav ps-3 align-items-lg-center text-nowrap">
                 {!loading &&
                   (isLoggedIn ? (
                     <li className="nav-item dropdown position-relative">

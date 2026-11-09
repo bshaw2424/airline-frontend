@@ -6,10 +6,7 @@ import AirlineStateSearch from "./Map/AirlineStateSearch";
 import Airlines from "./Airlines";
 
 // External Javascript functions in utilities file
-import {
-  upperCaseFirstLetterOfWord,
-  displayMessageIfSearchInputNotFound,
-} from "../Utilities";
+import { upperCaseFirstLetterOfWord } from "../Utilities";
 import Form from "../components/Form/Form";
 import AirlineDisclaimer from "../components/AirlineDisclaimer";
 import DisplayAirportCodeTitle from "./DisplayAirportCodeTitle";
@@ -21,7 +18,6 @@ export default function AirlineLanding() {
   const getAirlineDataFromLoader = useLoaderData();
 
   // state management methods
-  const [formSearch, setFormSearch] = useState();
   const [formValues, setFormValues] = useState("");
   const [selectOption, setSelectOption] = useState("default");
   const [filterIcons, setFilterIcons] = useState();
@@ -169,16 +165,6 @@ export default function AirlineLanding() {
     );
   };
 
-  const handleFormSearch = inputValue => {
-    !displayMessageIfSearchInputNotFound(
-      getAirlineDataFromLoader,
-      selectOption,
-      inputValue,
-    ).includes(true)
-      ? setFormSearch(true)
-      : setFormSearch(false);
-  };
-
   const airlineSearch = e => {
     e.preventDefault();
 
@@ -214,8 +200,6 @@ export default function AirlineLanding() {
     ) {
       setError(false);
     }
-
-    handleFormSearch(inputValueSubmittedFromForm);
   };
 
   return (

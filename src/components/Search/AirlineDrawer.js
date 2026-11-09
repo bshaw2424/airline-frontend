@@ -1,14 +1,40 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { IoMdClose } from "react-icons/io";
 
+/* Reusable Airport Card */
+function AirportCard({ airport }) {
+  return (
+    <div className="airline-drawer__item border rounded-3 p-2 p-md-3 h-100">
+      <div className="d-flex align-items-start justify-content-between gap-2 mb-2">
+        <strong>{airport.city || airport.name}</strong>
+
+        {airport.airport_code && (
+          <span className="badge bg-light text-dark border">
+            {airport.airport_code}
+          </span>
+        )}
+      </div>
+
+      <p className="text-muted small mb-0">{airport.airport_name}</p>
+    </div>
+  );
+}
+
+/* Airline Drawer */
 export default function AirlineDrawer({ airline, onClose }) {
+  const [showAllAirports, setShowAllAirports] = useState(false);
+
   if (!airline) {
     return null;
   }
 
+  const matchingAirports = airline.matchingAirports ?? [];
+
   return (
     <aside className="airline-drawer container my-4">
       <div className="border rounded-3 shadow-sm bg-white overflow-hidden">
+        {/* Drawer Header */}
         <header className="d-flex align-items-start justify-content-between gap-3 p-3 p-md-4 border-bottom">
           <div>
             <h2 className="fs-4 fw-semibold mb-2">{airline.name}</h2>
@@ -32,33 +58,76 @@ export default function AirlineDrawer({ airline, onClose }) {
           </button>
         </header>
 
+        {/* Airport Lists */}
         <div className="p-3 p-md-4">
-          <ul className="row g-3 list-unstyled mb-0">
-            {(airline.matchingAirports ?? []).map(airport => (
-              <li
-                key={`${airline.id}-${airport.airport_code}`}
-                className="col-12 col-md-6 col-lg-4"
-              >
-                <div className="airline-drawer__item border rounded-3 p-3 h-100">
-                  <div className="d-flex align-items-start justify-content-between gap-2 mb-2">
-                    <strong>{airport.city || airport.name}</strong>
+          {/* MOBILE: First Five Airports */}
+          <div className="d-md-none">
+            <ul className="list-unstyled d-grid gap-3 mb-0">
+              {matchingAirports.slice(0, 5).map((airport, index) => (
+                <li key={`${airline.id}-${airport.airport_code}-${index}`}>
+                  <AirportCard airport={airport} />
+                </li>
+              ))}
+            </ul>
 
-                    {airport.airport_code && (
-                      <span className="badge bg-light text-dark border">
-                        {airport.airport_code}
-                      </span>
-                    )}
+            {/* Expandable Additional Airports */}
+            {matchingAirports.length > 5 && (
+              <>
+                <div
+                  id="airline-extra-airports"
+                  className={`airline-drawer__expandable ${
+                    showAllAirports ? "is-open" : ""
+                  }`}
+                >
+                  <div className="airline-drawer__expandable-inner">
+                    <ul className="list-unstyled d-grid gap-3 mb-0 pt-3">
+                      {matchingAirports.slice(5).map((airport, index) => (
+                        <li
+                          key={`${airline.id}-${airport.airport_code}-${index + 5}`}
+                        >
+                          <AirportCard airport={airport} />
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-
-                  <p className="text-muted small mb-0">
-                    {airport.airport_name}
-                  </p>
                 </div>
+
+                {/* Show All / Show Fewer Button */}
+                <div className="text-center mt-3">
+                  <button
+                    type="button"
+                    className="btn btn-outline-primary w-100"
+                    onClick={() => setShowAllAirports(prev => !prev)}
+                    aria-expanded={showAllAirports}
+                    aria-controls="airline-extra-airports"
+                  >
+                    {showAllAirports
+                      ? "Show fewer airports"
+                      : `Show all ${matchingAirports.length} airports`}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* TABLET & DESKTOP: All Airports */}
+          <ul className="row g-3 justify-content-center list-unstyled mb-0 d-none d-md-flex">
+            {matchingAirports.map((airport, index) => (
+              <li
+                key={`${airline.id}-${airport.airport_code}-${index}`}
+                className={
+                  matchingAirports.length === 1
+                    ? "col-12"
+                    : "col-12 col-md-6 col-lg-4"
+                }
+              >
+                <AirportCard airport={airport} />
               </li>
             ))}
           </ul>
         </div>
 
+        {/* Drawer Footer */}
         {airline.slug && (
           <footer className="border-top p-3 p-md-4 d-flex justify-content-center justify-content-md-end">
             <Link to={`/airlines/${airline.slug}`} className="btn btn-primary">

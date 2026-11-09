@@ -14,8 +14,9 @@ import Collections from "./components/Collections";
 import CollectionDetails from "./components/CollectionDetails";
 import MyTrips from "./components/MyTrips";
 import TripDetails from "./components/TripDetails";
+import ExploreDestinations from "./components/ExploreDestinations";
 
-import { destinationIndexLoader as airlinesLoader } from "./components/AirlinesLanding";
+import { airlinesLoader } from "./loaders/airlinesLoader";
 import Destinations, { destinationsLoader } from "./components/Destinations";
 
 import {
@@ -25,7 +26,7 @@ import {
   RouterProvider,
 } from "react-router-dom";
 
-import AirlineLanding from "./components/AirlinesLanding";
+import ExploreAirlines from "./components/ExploreAirlines";
 import AirlineSearch from "./components/AirlineSearch";
 import ErrorPage from "./components/Error/ErrorPage";
 import AirlinePage from "./components/Airline/AirlinePage";
@@ -43,7 +44,7 @@ const router = createBrowserRouter(
       {/* Airline pages */}
       <Route
         path="airlines"
-        element={<AirlineLanding />}
+        element={<ExploreAirlines />}
         loader={airlinesLoader}
       />
 
@@ -85,7 +86,7 @@ const router = createBrowserRouter(
         loader={airlinesLoader}
       />
 
-      {/* Trips */}
+      {/* Trips  */}
       <Route path="my-trips" element={<MyTrips />} />
 
       <Route
@@ -93,6 +94,8 @@ const router = createBrowserRouter(
         element={<CollectionDetails />}
         loader={airlinesLoader}
       />
+
+      <Route path="destinations" element={<ExploreDestinations />} />
 
       {/* Dashboard */}
       <Route path="dashboard" element={<Dashboard />} />

@@ -8,7 +8,7 @@ export default function SearchResults({
   }
 
   return (
-    <section className="search-results container py-4">
+    <section className="search-results py-4">
       <header className="text-center mb-4">
         <h2 className="fs-3 fw-semibold">
           {searchInfo.airlineCount}{" "}
@@ -30,14 +30,9 @@ export default function SearchResults({
               onClick={() => onSelectAirline(airline)}
             >
               <div className="d-flex align-items-center justify-content-center w-100">
-                {airline.logo && (
-                  // <img
-                  //   src={`../${airline.logo}.png`}
-                  //   alt={airline.name}
-                  //   className="img-fluid search-results__logo"
-                  // />
-                  <h2>{airline.name}</h2>
-                )}
+                <h3 className="fs-5 fw-semibold text-center mb-0">
+                  {airline.name}
+                </h3>
               </div>
 
               <div className="text-center">

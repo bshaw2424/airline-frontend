@@ -1,26 +1,17 @@
-import { useLoaderData, useParams } from "react-router-dom";
-import axios from "axios";
-import AirlineDisplayContainer from "./AirlineDisplayContainer";
+import { useLoaderData } from "react-router-dom";
+import api from "../api/axios";
+import AirlineDestinationsPage from "./AirlineDestinationsPage";
 
 function Destinations() {
-  const { slug } = useParams();
-  const destinations = useLoaderData();
-  return (
-    <>
-      <AirlineDisplayContainer
-        destinations={destinations}
-        stateDestinations={destinations}
-      />
-    </>
-  );
+  const airline = useLoaderData();
+
+  return <AirlineDestinationsPage airline={airline} />;
 }
 
 const destinationsLoader = async ({ params }) => {
   const { slug } = params;
 
-  const response = await axios.get(
-    `https://whale-app-v8vd4.ondigitalocean.app/api/airlines/${slug}/destinations`,
-  );
+  const response = await api.get(`/api/airlines/${slug}/destinations`);
 
   return response.data;
 };

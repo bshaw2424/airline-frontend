@@ -13,14 +13,25 @@ export default function Home() {
   const isLoading = navigation.state === "loading";
 
   return (
-    <main>
+    <main className="home-page">
       {isLoading ? (
         <Loader loading={isLoading} />
       ) : (
         <>
-          <Hero />
-          <FeaturedAirlines airlineNames={airlineNames} />
-          <AirlineFeatureDescription />
+          {/* Hero and destination search */}
+          <section className="home-page__hero">
+            <Hero />
+          </section>
+
+          {/* Featured airlines */}
+          <section className="home-page__airlines">
+            <FeaturedAirlines airlineNames={airlineNames} />
+          </section>
+
+          {/* Feature highlights */}
+          <section className="home-page__features">
+            <AirlineFeatureDescription />
+          </section>
         </>
       )}
     </main>

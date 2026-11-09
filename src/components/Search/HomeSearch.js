@@ -4,14 +4,17 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import SearchForm from "./SearchForm";
 import SearchResults from "./SearchResults";
 import AirlineDrawer from "./AirlineDrawer";
+import NoSearchResults from "./NoSearchResults";
+import PopularDestinations from "./PopularDestinations";
 
 import {
   findMatches,
+  findLiveMatches,
   flattenAirlineDestinations,
   groupMatchesByAirline,
 } from "./SearchHelpers";
 
-export default function HomeSearch() {
+export default function HomeSearch({ showPopularDestinations = false }) {
   const [allAirlines, setAllAirlines] = useState([]);
   const [search, setSearch] = useState("");
   const [results, setResults] = useState([]);
@@ -19,6 +22,7 @@ export default function HomeSearch() {
   const [selectedAirline, setSelectedAirline] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [showNoResults, setShowNoResults] = useState(false);
 
   const drawerRef = useRef(null);
 
@@ -45,6 +49,26 @@ export default function HomeSearch() {
 
     fetchAirlines();
   }, []);
+
+  useEffect(() => {
+    if (
+      search.trim().length < 2 ||
+      results.length > 0 ||
+      loading ||
+      error.startsWith("Unable")
+    ) {
+      setShowNoResults(false);
+      return;
+    }
+
+    setShowNoResults(false);
+
+    const timer = setTimeout(() => {
+      setShowNoResults(true);
+    }, 800);
+
+    return () => clearTimeout(timer);
+  }, [search, results, loading, error]);
 
   const searchableDestinations = useMemo(() => {
     return flattenAirlineDestinations(allAirlines);
@@ -81,7 +105,7 @@ export default function HomeSearch() {
     if (!searchMatch) {
       setResults([]);
       setSearchInfo(null);
-      setError(`No results found for "${query}".`);
+      setError(`No airline destinations found for "${query}".`);
       return;
     }
 
@@ -97,6 +121,7 @@ export default function HomeSearch() {
   };
 
   const handleClear = () => {
+    setShowNoResults(false);
     setSearch("");
     setResults([]);
     setSearchInfo(null);
@@ -104,18 +129,61 @@ export default function HomeSearch() {
     setError("");
   };
 
+  const handleSearchChange = value => {
+    setSearch(value);
+    setSelectedAirline(null);
+    setError("");
+
+    const query = value.trim();
+
+    if (query.length < 2) {
+      setResults([]);
+      setSearchInfo(null);
+      return;
+    }
+
+    const liveMatches = findLiveMatches(searchableDestinations, query);
+
+    const groupedResults = groupMatchesByAirline(liveMatches);
+
+    setResults(groupedResults);
+
+    setSearchInfo(
+      groupedResults.length > 0
+        ? {
+            type: "destination",
+            query,
+            airlineCount: groupedResults.length,
+          }
+        : null,
+    );
+
+    if (groupedResults.length === 0) {
+      setError(`No airline destinations found for "${query}".`);
+    } else {
+      setError("");
+    }
+  };
+
   return (
     <section className="home-search">
       <SearchForm
         search={search}
-        setSearch={setSearch}
+        setSearch={handleSearchChange}
         loading={loading}
         onSubmit={handleSearch}
         onClear={handleClear}
       />
 
-      {error && <p className="home-search__error text-center mt-3">{error}</p>}
-
+      {/*  error message */}
+      {showNoResults ? (
+        <NoSearchResults query={search.trim()} />
+      ) : (
+        error &&
+        !error.startsWith("No airline destinations found") && (
+          <p className="home-search__error text-center mt-3">{error}</p>
+        )
+      )}
       <article>
         <SearchResults
           results={results}
@@ -130,6 +198,9 @@ export default function HomeSearch() {
           />
         </div>
       </article>
+      {showPopularDestinations && !search.trim() && (
+        <PopularDestinations onSelectDestination={handleSearchChange} />
+      )}
     </section>
   );
 }
