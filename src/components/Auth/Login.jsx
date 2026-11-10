@@ -91,9 +91,17 @@ const Login = () => {
         </button>
       </form>
 
-      <p className="text-center mt-4">
-        Don't have an account? <Link to="/register">Sign up</Link>
+      <p className="d-flex text-center mt-4 justify-content-center align-items-center">
+        Don't have an account?{" "}
+        <Link className="btn btn-link ms-2 p-0" to="/register">
+          Sign up
+        </Link>
       </p>
+      <div className="text-center m-auto mb-3">
+        <Link className="btn btn-link" to="/forgot-password">
+          Forgot password?
+        </Link>
+      </div>
     </main>
   );
 };

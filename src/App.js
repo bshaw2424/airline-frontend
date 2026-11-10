@@ -15,9 +15,12 @@ import CollectionDetails from "./components/CollectionDetails";
 import MyTrips from "./components/MyTrips";
 import TripDetails from "./components/TripDetails";
 import ExploreDestinations from "./components/ExploreDestinations";
+import DeleteAccount from "./components/Auth/DeleteAccount";
 
 import { airlinesLoader } from "./loaders/airlinesLoader";
 import Destinations, { destinationsLoader } from "./components/Destinations";
+import ResetPassword from "./components/Auth/ResetPassword";
+import ForgotPassword from "./components/Auth/ForgotPassword";
 
 import {
   createBrowserRouter,
@@ -40,6 +43,9 @@ const router = createBrowserRouter(
       <Route path="about" element={<About />} />
       <Route path="login" element={<Login />} />
       <Route path="register" element={<Register />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/delete-account" element={<DeleteAccount />} />
 
       {/* Airline pages */}
       <Route

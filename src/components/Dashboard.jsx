@@ -337,6 +337,11 @@ export default function Dashboard() {
           Explore Destinations
         </Link>
       </section>
+      <section className="border-top mt-4 pt-3">
+        <Link to="/delete-account" className="btn btn-outline-danger">
+          Delete account
+        </Link>
+      </section>
     </main>
   );
 }
