@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { FaHeart, FaRegHeart } from "react-icons/fa";
 
 const airlineLogos = {
   "Delta Airlines": "/delta_logo.png",
@@ -12,7 +13,12 @@ const airlineLogos = {
   "United Airlines": "/united_logo.png",
 };
 
-export default function AirlineCard({ airline }) {
+export default function AirlineCard({
+  airline,
+  isSaved = false,
+  saveDisabled = false,
+  onToggleSave,
+}) {
   const destinationCount = Array.isArray(airline.destinations)
     ? airline.destinations.length
     : 0;
@@ -20,7 +26,24 @@ export default function AirlineCard({ airline }) {
   const airlineLogo = airlineLogos[airline.name];
 
   return (
-    <article className="explore-airlines__card border rounded-3 shadow-sm bg-white h-100 overflow-hidden">
+    <article className="explore-airlines__card position-relative border rounded-3 shadow-sm bg-white h-100 overflow-hidden">
+      {onToggleSave && (
+        <button
+          type="button"
+          className="btn btn-sm btn-light text-danger position-absolute top-0 end-0 m-3"
+          aria-label={`Save ${airline.name}`}
+          aria-pressed={isSaved}
+          disabled={saveDisabled}
+          onClick={() => onToggleSave(airline.slug)}
+        >
+          {isSaved ? (
+            <FaHeart aria-hidden="true" />
+          ) : (
+            <FaRegHeart aria-hidden="true" />
+          )}
+        </button>
+      )}
+
       <div className="p-4 d-flex flex-column text-center h-100">
         <div className="mb-3">
           {airlineLogo && (

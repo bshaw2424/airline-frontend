@@ -1,11 +1,81 @@
-import { useState } from "react";
-import { useLoaderData } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useLoaderData, useNavigate } from "react-router-dom";
+
+import api from "../api/axios";
+import { useAuth } from "../context/AuthContext";
 import ExploreAirlinesHero from "./ExploreAirlinesHero";
 import AirlineCard from "./AirlineCard";
 
 export default function ExploreAirlines() {
   const airlineData = useLoaderData();
+  const navigate = useNavigate();
+  const { isLoggedIn, loading: authLoading } = useAuth();
+
   const [search, setSearch] = useState("");
+  const [savedAirlines, setSavedAirlines] = useState(null);
+  const [savingAirline, setSavingAirline] = useState(false);
+  const [favoritesError, setFavoritesError] = useState("");
+
+  useEffect(() => {
+    if (authLoading) return;
+
+    setSavedAirlines(null);
+    setFavoritesError("");
+
+    if (!isLoggedIn) return;
+
+    let active = true;
+
+    async function loadSavedAirlines() {
+      try {
+        const response = await api.get("/api/favorites/airlines");
+
+        if (active) {
+          setSavedAirlines(response.data.savedAirlines ?? []);
+        }
+      } catch {
+        if (active) {
+          setFavoritesError(
+            "Unable to load saved airlines. Refresh to try again.",
+          );
+        }
+      }
+    }
+
+    loadSavedAirlines();
+
+    return () => {
+      active = false;
+    };
+  }, [authLoading, isLoggedIn]);
+
+  // Each update returns the full saved list, so submit one change at a time.
+  const saveDisabled =
+    authLoading || savingAirline || (isLoggedIn && savedAirlines === null);
+
+  async function handleToggleSave(airlineSlug) {
+    if (saveDisabled) return;
+
+    if (!isLoggedIn) {
+      navigate("/login");
+      return;
+    }
+
+    setSavingAirline(true);
+    setFavoritesError("");
+
+    try {
+      const response = savedAirlines.includes(airlineSlug)
+        ? await api.delete(`/api/favorites/airlines/${airlineSlug}`)
+        : await api.post("/api/favorites/airlines", { airlineSlug });
+
+      setSavedAirlines(response.data.savedAirlines ?? []);
+    } catch {
+      setFavoritesError("Unable to update saved airline. Please try again.");
+    } finally {
+      setSavingAirline(false);
+    }
+  }
 
   const airlines = Array.isArray(airlineData)
     ? airlineData
@@ -42,6 +112,12 @@ export default function ExploreAirlines() {
           />
         </div>
 
+        {favoritesError && (
+          <p className="text-danger text-center" role="alert">
+            {favoritesError}
+          </p>
+        )}
+
         {filteredAirlines.length > 0 ? (
           <div className="row g-4 justify-content-center">
             {filteredAirlines.map(airline => (
@@ -53,7 +129,15 @@ export default function ExploreAirlines() {
                     : "col-12 col-md-6 col-lg-4"
                 }
               >
-                <AirlineCard airline={airline} />
+                <AirlineCard
+                  airline={airline}
+                  isSaved={
+                    isLoggedIn &&
+                    (savedAirlines?.includes(airline.slug) ?? false)
+                  }
+                  saveDisabled={saveDisabled}
+                  onToggleSave={handleToggleSave}
+                />
               </div>
             ))}
           </div>
