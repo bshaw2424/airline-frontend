@@ -1,10 +1,113 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { FaHeart, FaRegHeart } from "react-icons/fa";
+
+import api from "../api/axios";
+import { useAuth } from "../context/AuthContext";
 
 export default function AirlineDestinationsPage({ airline }) {
   // Track search text and dropdown selections.
   const [search, setSearch] = useState("");
   const [service, setService] = useState("all");
   const [location, setLocation] = useState("");
+
+  const navigate = useNavigate();
+  const { isLoggedIn, loading: authLoading } = useAuth();
+
+  const [savedDestinations, setSavedDestinations] = useState(null);
+  const [savingDestination, setSavingDestination] = useState(false);
+  const [favoritesError, setFavoritesError] = useState("");
+
+  useEffect(() => {
+    if (authLoading) return;
+
+    setSavedDestinations(null);
+    setFavoritesError("");
+
+    if (!isLoggedIn) return;
+
+    let active = true;
+
+    async function loadSavedDestinations() {
+      try {
+        const response = await api.get("/api/favorites/destinations");
+
+        if (active) {
+          setSavedDestinations(response.data.savedDestinations ?? []);
+        }
+      } catch {
+        if (active) {
+          setFavoritesError(
+            "Unable to load saved destinations. Refresh to retry.",
+          );
+        }
+      }
+    }
+
+    loadSavedDestinations();
+
+    return () => {
+      active = false;
+    };
+  }, [authLoading, isLoggedIn]);
+
+  const saveDisabled =
+    authLoading ||
+    savingDestination ||
+    (isLoggedIn && savedDestinations === null);
+
+  async function handleToggleSave(airportCode) {
+    if (saveDisabled) return;
+
+    if (!isLoggedIn) {
+      navigate("/login");
+      return;
+    }
+
+    setSavingDestination(true);
+    setFavoritesError("");
+
+    try {
+      const response = savedDestinations.includes(airportCode)
+        ? await api.delete(`/api/favorites/destinations/${airportCode}`)
+        : await api.post("/api/favorites/destinations", { airportCode });
+
+      setSavedDestinations(response.data.savedDestinations ?? []);
+    } catch {
+      setFavoritesError(
+        "Unable to update saved destinations. Please try again.",
+      );
+    } finally {
+      setSavingDestination(false);
+    }
+  }
+
+  function renderSaveButton(destination) {
+    const airportCode = destination.airport_code?.trim().toUpperCase();
+
+    if (!airportCode) return null;
+
+    const isSaved =
+      isLoggedIn && (savedDestinations?.includes(airportCode) ?? false);
+
+    return (
+      <button
+        type="button"
+        className="btn btn-link p-2 border-0"
+        aria-label={`Save ${destination.name || airportCode}`}
+        aria-pressed={isSaved}
+        title={isSaved ? "Remove from saved destinations" : "Save destination"}
+        disabled={saveDisabled}
+        onClick={() => handleToggleSave(airportCode)}
+      >
+        {isSaved ? (
+          <FaHeart className="text-danger" size={19} aria-hidden="true" />
+        ) : (
+          <FaRegHeart className="text-secondary" size={19} aria-hidden="true" />
+        )}
+      </button>
+    );
+  }
 
   // Ensure destinations is always an array.
   const destinations = Array.isArray(airline?.destinations)
@@ -202,6 +305,12 @@ export default function AirlineDestinationsPage({ airline }) {
         )}
       </section>
 
+      {favoritesError && (
+        <p className="text-danger" role="alert">
+          {favoritesError}
+        </p>
+      )}
+
       {/* Destination results and current result count. */}
       <section aria-labelledby="destinations-heading">
         {filteredDestinations.length > 0 ? (
@@ -232,6 +341,9 @@ export default function AirlineDestinationsPage({ airline }) {
                       <th scope="col" className="px-3 py-3">
                         Service
                       </th>
+                      <th scope="col" className="px-3 py-3 text-center">
+                        Save
+                      </th>
                     </tr>
                   </thead>
 
@@ -251,6 +363,10 @@ export default function AirlineDestinationsPage({ airline }) {
                         <td>{destination.state || "—"}</td>
 
                         <td className="px-3">{renderService(destination)}</td>
+
+                        <td className="px-3 text-center">
+                          {renderSaveButton(destination)}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -290,7 +406,10 @@ export default function AirlineDestinationsPage({ airline }) {
                       .join(", ")}
                   </p>
 
-                  {renderService(destination)}
+                  <div className="d-flex justify-content-between align-items-center gap-2">
+                    {renderService(destination)}
+                    {renderSaveButton(destination)}
+                  </div>
                 </li>
               ))}
             </ul>
