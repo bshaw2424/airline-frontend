@@ -474,7 +474,7 @@ export default function CollectionDetails() {
 
       {/* Collection header */}
       <section className="mb-4">
-        <div className="d-flex flex-wrap align-items-start justify-content-between gap-3">
+        <div className="d-flex flex-column flex-sm-row flex-sm-wrap align-items-stretch align-items-sm-start justify-content-between gap-3">
           <div className="flex-grow-1">
             <h1 className="h3 mb-2">{collection.name}</h1>
 
@@ -487,10 +487,10 @@ export default function CollectionDetails() {
             </span>
           </div>
 
-          <div className="d-flex align-items-center gap-3">
+          <div className="d-grid d-sm-flex align-items-center gap-3">
             <button
               type="button"
-              className="btn btn-outline-primary btn-sm d-flex align-items-center gap-2"
+              className="btn btn-outline-primary btn-sm d-flex align-items-center justify-content-center gap-2"
               onClick={isEditing ? handleCancelEdit : handleStartEdit}
               disabled={savingEdit}
               aria-expanded={isEditing}
@@ -499,7 +499,11 @@ export default function CollectionDetails() {
               {isEditing ? "Cancel Editing" : "Edit Collection"}
             </button>
 
-            <FaFolderOpen className="text-primary flex-shrink-0" size={30} />
+            <FaFolderOpen
+              className="text-primary flex-shrink-0 d-none d-sm-block"
+              size={30}
+              aria-hidden="true"
+            />
           </div>
         </div>
 
@@ -640,7 +644,7 @@ export default function CollectionDetails() {
 
         {/* Filters */}
         <div
-          className="d-flex flex-wrap gap-2 mb-4"
+          className="d-grid d-sm-flex flex-wrap gap-2 mb-4"
           role="group"
           aria-label="Filter saved places"
         >

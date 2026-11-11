@@ -113,7 +113,7 @@ export default function AddPlace({ collectionId, onPlaceAdded }) {
     <section className="card shadow-sm rounded-3 mb-4">
       <div className="card-body p-3 p-md-4">
         {/* Header */}
-        <div className="d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <div className="d-flex flex-column flex-sm-row flex-sm-wrap align-items-stretch align-items-sm-center justify-content-between gap-3">
           <div>
             <h2 className="h5 mb-2">
               <FaMapMarkerAlt className="text-primary me-2" />
@@ -128,7 +128,7 @@ export default function AddPlace({ collectionId, onPlaceAdded }) {
 
           <button
             type="button"
-            className="btn btn-outline-primary d-flex align-items-center gap-2"
+            className="btn btn-outline-primary d-flex align-items-center justify-content-center gap-2"
             onClick={() => {
               if (isOpen) {
                 handleCancel();
