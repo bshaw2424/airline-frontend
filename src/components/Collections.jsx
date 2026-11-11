@@ -204,7 +204,7 @@ export default function Collections() {
 
         <button
           type="button"
-          className="btn btn-primary d-flex align-items-center gap-2"
+          className="btn btn-primary d-flex align-items-center gap-2 collections-new-button"
           onClick={() => {
             setShowForm(previous => !previous);
             setFormError("");

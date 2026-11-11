@@ -1072,4 +1072,12 @@ ul li {
   object-fit: cover;
 }
 
+/* collections mobile button */
+@media (max-width: 575.98px) {
+  .collections-new-button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
 /*# sourceMappingURL=App.css.map */
