@@ -15,22 +15,27 @@ import {
 } from "./SearchHelpers";
 
 export default function HomeSearch({ showPopularDestinations = false }) {
+  // Airline data, search results, and the selected airline
   const [allAirlines, setAllAirlines] = useState([]);
   const [search, setSearch] = useState("");
   const [results, setResults] = useState([]);
   const [searchInfo, setSearchInfo] = useState(null);
   const [selectedAirline, setSelectedAirline] = useState(null);
+
+  // Loading status, errors, and no-results visibility
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [loadError, setLoadError] = useState("");
   const [showNoResults, setShowNoResults] = useState(false);
 
   const drawerRef = useRef(null);
 
+  // Load airline data when the search component mounts
   useEffect(() => {
     const fetchAirlines = async () => {
       try {
         setLoading(true);
-        setError("");
+        setLoadError("");
 
         const response = await api.get("/api/airlines/info");
 
@@ -41,7 +46,9 @@ export default function HomeSearch({ showPopularDestinations = false }) {
         setAllAirlines(airlineData);
       } catch (err) {
         console.error("Unable to load airlines:", err);
-        setError("Unable to load airline data.");
+        setLoadError(
+          "Unable to load airline data. Refresh the page to try again.",
+        );
       } finally {
         setLoading(false);
       }
@@ -50,6 +57,7 @@ export default function HomeSearch({ showPopularDestinations = false }) {
     fetchAirlines();
   }, []);
 
+  // Wait 800 ms before showing the no-results message
   useEffect(() => {
     if (
       search.trim().length < 2 ||
@@ -70,11 +78,12 @@ export default function HomeSearch({ showPopularDestinations = false }) {
     return () => clearTimeout(timer);
   }, [search, results, loading, error]);
 
+  // Rebuild the searchable destination list when airline data changes
   const searchableDestinations = useMemo(() => {
     return flattenAirlineDestinations(allAirlines);
   }, [allAirlines]);
 
-  // Scroll to the selected airline's destinations
+  // Scroll the airline drawer into view when a result is selected
   useEffect(() => {
     if (selectedAirline) {
       drawerRef.current?.scrollIntoView({
@@ -84,6 +93,7 @@ export default function HomeSearch({ showPopularDestinations = false }) {
     }
   }, [selectedAirline]);
 
+  // Run the submitted search and group matching destinations by airline
   const handleSearch = event => {
     event.preventDefault();
 
@@ -120,6 +130,7 @@ export default function HomeSearch({ showPopularDestinations = false }) {
     });
   };
 
+  // Clear the query, results, and open drawer
   const handleClear = () => {
     setShowNoResults(false);
     setSearch("");
@@ -129,6 +140,7 @@ export default function HomeSearch({ showPopularDestinations = false }) {
     setError("");
   };
 
+  // Update live results for typed queries and popular destination selections
   const handleSearchChange = value => {
     setSearch(value);
     setSelectedAirline(null);
@@ -165,8 +177,38 @@ export default function HomeSearch({ showPopularDestinations = false }) {
     }
   };
 
+  // Loading state while the airline data request is pending
+  if (loading) {
+    return (
+      <section className="home-search">
+        <div
+          className="d-flex align-items-center justify-content-center gap-2 py-4"
+          role="status"
+        >
+          <span
+            className="spinner-border spinner-border-sm text-primary"
+            aria-hidden="true"
+          />
+          <span>Loading destinations…</span>
+        </div>
+      </section>
+    );
+  }
+
+  // Error state when the airline data request fails
+  if (loadError) {
+    return (
+      <section className="home-search">
+        <p className="alert alert-danger mt-3" role="alert">
+          {loadError}
+        </p>
+      </section>
+    );
+  }
+
   return (
     <section className="home-search">
+      {/* Search input and controls */}
       <SearchForm
         search={search}
         setSearch={handleSearchChange}
@@ -175,7 +217,7 @@ export default function HomeSearch({ showPopularDestinations = false }) {
         onClear={handleClear}
       />
 
-      {/*  error message */}
+      {/* No-results message or search validation error */}
       {showNoResults ? (
         <NoSearchResults query={search.trim()} />
       ) : (
@@ -184,6 +226,8 @@ export default function HomeSearch({ showPopularDestinations = false }) {
           <p className="home-search__error text-center mt-3">{error}</p>
         )
       )}
+
+      {/* Matching airlines and the selected airline's destination drawer */}
       <article>
         <SearchResults
           results={results}
@@ -198,6 +242,8 @@ export default function HomeSearch({ showPopularDestinations = false }) {
           />
         </div>
       </article>
+
+      {/* Show popular destinations when enabled and the search is empty */}
       {showPopularDestinations && !search.trim() && (
         <PopularDestinations onSelectDestination={handleSearchChange} />
       )}
