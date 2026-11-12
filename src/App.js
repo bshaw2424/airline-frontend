@@ -31,7 +31,7 @@ import {
 
 import ExploreAirlines from "./components/ExploreAirlines";
 import AirlineSearch from "./components/AirlineSearch";
-import ErrorPage from "./components/Error/ErrorPage";
+import NotFoundPage from "./components/Error/NotFoundPage";
 import AirlinePage from "./components/Airline/AirlinePage";
 
 const router = createBrowserRouter(
@@ -111,7 +111,7 @@ const router = createBrowserRouter(
       <Route path="my-trips/:id" element={<TripDetails />} />
 
       {/* Not found */}
-      <Route path="*" element={<ErrorPage />} />
+      <Route path="*" element={<NotFoundPage />} />
     </Route>,
   ),
 );
