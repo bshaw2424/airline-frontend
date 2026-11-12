@@ -46,10 +46,10 @@ export default function useDestinationFavorites() {
     };
   }, [authLoading, isLoggedIn]);
 
-  const saveDisabled =
-    authLoading ||
-    savingDestination ||
-    (isLoggedIn && savedDestinations === null);
+  const favoritesUnavailable =
+    authLoading || (isLoggedIn && savedDestinations === null);
+
+  const saveDisabled = favoritesUnavailable || savingDestination;
 
   async function handleToggleSave(airportCode) {
     if (saveDisabled) return;
@@ -93,7 +93,8 @@ export default function useDestinationFavorites() {
         aria-label={`Save ${destination.name || airportCode}`}
         aria-pressed={isSaved}
         title={isSaved ? "Remove from saved destinations" : "Save destination"}
-        disabled={saveDisabled}
+        disabled={favoritesUnavailable}
+        aria-disabled={saveDisabled}
         onClick={() => handleToggleSave(airportCode)}
       >
         {isSaved ? (
