@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import { MdOutlineErrorOutline } from "react-icons/md";
 
 export default function NotFoundPage() {
   return (
@@ -8,9 +7,6 @@ export default function NotFoundPage() {
         <p className="not-found-page__code">404</p>
 
         <h1 id="not-found-title d-flex align-items-center justify-content-center">
-          <span>
-            <MdOutlineErrorOutline size={100} />
-          </span>
           Page not found
         </h1>
 
