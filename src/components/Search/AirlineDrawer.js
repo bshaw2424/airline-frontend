@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { IoMdClose } from "react-icons/io";
+import useDestinationFavorites from "../useDestinationFavorites";
 
-/* Reusable Airport Card */
-function AirportCard({ airport }) {
+function AirportCard({ airport, saveButton }) {
   return (
     <div className="airline-drawer__item border rounded-3 p-2 p-md-3 h-100">
       <div className="d-flex align-items-start justify-content-between gap-2 mb-2">
@@ -16,14 +16,17 @@ function AirportCard({ airport }) {
         )}
       </div>
 
-      <p className="text-muted small mb-0">{airport.airport_name}</p>
+      <div className="d-flex align-items-center justify-content-between gap-2">
+        <p className="text-muted small mb-0">{airport.airport_name}</p>
+        {saveButton && <div className="flex-shrink-0">{saveButton}</div>}
+      </div>
     </div>
   );
 }
 
-/* Airline Drawer */
 export default function AirlineDrawer({ airline, onClose }) {
   const [showAllAirports, setShowAllAirports] = useState(false);
+  const { favoritesError, renderSaveButton } = useDestinationFavorites();
 
   if (!airline) {
     return null;
@@ -34,7 +37,7 @@ export default function AirlineDrawer({ airline, onClose }) {
   return (
     <aside className="airline-drawer container my-4">
       <div className="border rounded-3 shadow-sm bg-white overflow-hidden">
-        {/* Drawer Header */}
+        {/* Drawer header */}
         <header className="d-flex align-items-start justify-content-between gap-3 p-3 p-md-4 border-bottom">
           <div>
             <h2 className="fs-4 fw-semibold mb-2">{airline.name}</h2>
@@ -58,19 +61,28 @@ export default function AirlineDrawer({ airline, onClose }) {
           </button>
         </header>
 
-        {/* Airport Lists */}
+        {/* Airport lists */}
         <div className="p-3 p-md-4">
-          {/* MOBILE: First Five Airports */}
+          {favoritesError && (
+            <p className="text-danger" role="alert">
+              {favoritesError}
+            </p>
+          )}
+
+          {/* Mobile: first five airports */}
           <div className="d-md-none">
             <ul className="list-unstyled d-grid gap-3 mb-0">
               {matchingAirports.slice(0, 5).map((airport, index) => (
                 <li key={`${airline.id}-${airport.airport_code}-${index}`}>
-                  <AirportCard airport={airport} />
+                  <AirportCard
+                    airport={airport}
+                    saveButton={renderSaveButton(airport)}
+                  />
                 </li>
               ))}
             </ul>
 
-            {/* Expandable Additional Airports */}
+            {/* Expandable additional airports */}
             {matchingAirports.length > 5 && (
               <>
                 <div
@@ -78,6 +90,7 @@ export default function AirlineDrawer({ airline, onClose }) {
                   className={`airline-drawer__expandable ${
                     showAllAirports ? "is-open" : ""
                   }`}
+                  aria-hidden={!showAllAirports}
                 >
                   <div className="airline-drawer__expandable-inner">
                     <ul className="list-unstyled d-grid gap-3 mb-0 pt-3">
@@ -85,14 +98,19 @@ export default function AirlineDrawer({ airline, onClose }) {
                         <li
                           key={`${airline.id}-${airport.airport_code}-${index + 5}`}
                         >
-                          <AirportCard airport={airport} />
+                          <AirportCard
+                            airport={airport}
+                            saveButton={renderSaveButton(
+                              airport,
+                              showAllAirports ? undefined : -1,
+                            )}
+                          />
                         </li>
                       ))}
                     </ul>
                   </div>
                 </div>
 
-                {/* Show All / Show Fewer Button */}
                 <div className="text-center mt-3">
                   <button
                     type="button"
@@ -110,7 +128,7 @@ export default function AirlineDrawer({ airline, onClose }) {
             )}
           </div>
 
-          {/* TABLET & DESKTOP: All Airports */}
+          {/* Tablet and desktop: all airports */}
           <ul className="row g-3 justify-content-center list-unstyled mb-0 d-none d-md-flex">
             {matchingAirports.map((airport, index) => (
               <li
@@ -121,13 +139,16 @@ export default function AirlineDrawer({ airline, onClose }) {
                     : "col-12 col-md-6 col-lg-4"
                 }
               >
-                <AirportCard airport={airport} />
+                <AirportCard
+                  airport={airport}
+                  saveButton={renderSaveButton(airport)}
+                />
               </li>
             ))}
           </ul>
         </div>
 
-        {/* Drawer Footer */}
+        {/* Drawer footer */}
         {airline.slug && (
           <footer className="border-top p-3 p-md-4 d-flex justify-content-center justify-content-md-end">
             <Link to={`/airlines/${airline.slug}`} className="btn btn-primary">
