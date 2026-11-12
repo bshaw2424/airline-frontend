@@ -1083,4 +1083,35 @@ ul li {
   }
 }
 
+/* Not Found Page */
+.not-found-page {
+  display: grid;
+  place-items: center;
+  min-height: 50vh;
+  padding: 3rem 1rem;
+  background: #f4f8fd;
+  text-align: center;
+}
+
+.not-found-page__content {
+  width: 100%;
+  max-width: 32rem;
+}
+
+.not-found-page__code {
+  margin-bottom: 0.5rem;
+  color: #1e5ba0;
+  font-weight: 600;
+}
+
+.not-found-page h1 {
+  margin-bottom: 0.75rem;
+  font-size: clamp(2rem, 5vw, 3rem);
+}
+
+.not-found-page__message {
+  margin-bottom: 1.5rem;
+  color: #475569;
+}
+
 /*# sourceMappingURL=App.css.map */
