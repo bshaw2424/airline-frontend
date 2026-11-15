@@ -21,6 +21,7 @@ import { airlinesLoader } from "./loaders/airlinesLoader";
 import Destinations, { destinationsLoader } from "./components/Destinations";
 import ResetPassword from "./components/Auth/ResetPassword";
 import ForgotPassword from "./components/Auth/ForgotPassword";
+import Feedback from "./components/Feedback";
 
 import {
   createBrowserRouter,
@@ -41,6 +42,7 @@ const router = createBrowserRouter(
       <Route index element={<Home />} loader={homeLoader} />
 
       <Route path="about" element={<About />} />
+      <Route path="/feedback" element={<Feedback />} />
       <Route path="login" element={<Login />} />
       <Route path="register" element={<Register />} />
       <Route path="/reset-password" element={<ResetPassword />} />

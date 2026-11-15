@@ -123,6 +123,16 @@ export default function NavRoot() {
                     About
                   </NavLink>
                 </li>
+                {/* Give signed-in users and guests a way to open the feedback form. */}
+                <li className="nav-item">
+                  <NavLink
+                    to="/feedback"
+                    className="nav-link"
+                    onClick={handleNavLinkClick}
+                  >
+                    Feedback
+                  </NavLink>
+                </li>
               </ul>
 
               {/* Authentication navigation */}
