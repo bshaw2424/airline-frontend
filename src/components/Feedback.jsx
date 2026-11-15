@@ -65,7 +65,7 @@ export default function Feedback() {
 
           <form onSubmit={handleSubmit}>
             {/* Collect the feedback category and message. */}
-            <fieldset disabled={submitting}>
+            <fieldset disabled={submitting || Boolean(success)}>
               <div className="mb-3">
                 <label htmlFor="feedback-category" className="form-label">
                   Category
