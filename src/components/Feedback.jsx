@@ -1,12 +1,26 @@
-import { useState } from "react";
 import api from "../api/axios";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function Feedback() {
+  const navigate = useNavigate();
+
   const [category, setCategory] = useState("");
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
+
+  // Show the confirmation briefly before returning home.
+  useEffect(() => {
+    if (!success) return;
+
+    const redirectTimer = setTimeout(() => {
+      navigate("/", { replace: true });
+    }, 2500);
+
+    return () => clearTimeout(redirectTimer);
+  }, [success, navigate]);
 
   // Submit feedback and keep the draft if the request fails.
   async function handleSubmit(event) {
