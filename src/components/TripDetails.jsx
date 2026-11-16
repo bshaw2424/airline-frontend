@@ -867,9 +867,10 @@ export default function TripDetails() {
                     type="button"
                     className="btn btn-outline-primary d-flex flex-wrap align-items-center gap-2 trip-stop-row__actions"
                     onClick={() => setPhotoStop(stop)}
-                    aria-label={`Photos for ${stop.name}`}
+                    aria-label={`Media for ${stop.name}`}
                   >
-                    Photos ({stop.photos?.length ?? 0})
+                    Media (
+                    {(stop.photos?.length ?? 0) + (stop.videos?.length ?? 0)})
                   </button>
 
                   <div className="d-flex flex-wrap align-items-center gap-2 ms-5">
