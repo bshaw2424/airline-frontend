@@ -873,9 +873,9 @@ export default function TripDetails() {
                     {(stop.photos?.length ?? 0) + (stop.videos?.length ?? 0)})
                   </button>
 
-                  <div className="d-flex flex-wrap align-items-center gap-2 ms-5">
+                  <div className="d-flex flex-wrap align-items-center justify-content-between gap-2">
                     {!stop.isLegacy && (
-                      <>
+                      <div className="d-flex gap-2">
                         <button
                           type="button"
                           className="btn btn-outline-secondary btn-sm"
@@ -899,7 +899,11 @@ export default function TripDetails() {
                         >
                           ↓
                         </button>
+                      </div>
+                    )}
 
+                    <div className="d-flex gap-2 ms-auto">
+                      {!stop.isLegacy && (
                         <button
                           type="button"
                           className="btn btn-outline-primary btn-sm"
@@ -909,27 +913,27 @@ export default function TripDetails() {
                         >
                           Edit
                         </button>
-                      </>
-                    )}
+                      )}
 
-                    <button
-                      type="button"
-                      className="btn btn-outline-danger btn-sm"
-                      onClick={() =>
-                        stop.isLegacy
-                          ? handleRemoveLegacyDestination(stop.airportCode)
-                          : handleRemoveStop(stop.id)
-                      }
-                      disabled={
-                        isDestinationBusy || editingStop?.id === stop.id
-                      }
-                      aria-label={`Remove ${stop.name} from trip`}
-                    >
-                      {removingDestination ===
-                      (stop.isLegacy ? stop.airportCode : stop.id)
-                        ? "Removing..."
-                        : "Remove"}
-                    </button>
+                      <button
+                        type="button"
+                        className="btn btn-outline-danger btn-sm"
+                        onClick={() =>
+                          stop.isLegacy
+                            ? handleRemoveLegacyDestination(stop.airportCode)
+                            : handleRemoveStop(stop.id)
+                        }
+                        disabled={
+                          isDestinationBusy || editingStop?.id === stop.id
+                        }
+                        aria-label={`Remove ${stop.name} from trip`}
+                      >
+                        {removingDestination ===
+                        (stop.isLegacy ? stop.airportCode : stop.id)
+                          ? "Removing..."
+                          : "Remove"}
+                      </button>
+                    </div>
                   </div>
                 </li>
               ))}
