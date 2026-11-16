@@ -1114,4 +1114,54 @@ ul li {
   color: #475569;
 }
 
+/* list group */
+.list-group-item.trip-stop-row {
+  display: grid;
+  gap: 1rem;
+}
+
+.trip-stop-row > :first-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (min-width: 768px) {
+  .list-group-item.trip-stop-row {
+    grid-template-columns: minmax(0, 1fr) 7rem minmax(0, 1fr);
+    align-items: center;
+  }
+
+  .trip-stop-row__photos {
+    justify-self: start;
+  }
+
+  .trip-stop-row__actions {
+    justify-content: flex-end;
+  }
+}
+
+/* trip stop photo gallery */
+.trip-stop-photos__image {
+  display: block;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+
+.trip-stop-photos__viewer-media {
+  display: block;
+  width: 100%;
+  height: min(65vh, 640px);
+  object-fit: contain;
+}
+
+/* Prevent the trip page from scrolling while the gallery is open. */
+body:has(dialog.trip-stop-photos[open]) {
+  overflow: hidden;
+}
+
+/* Let the gallery scroll when its content exceeds the available height. */
+dialog.trip-stop-photos {
+  overflow-y: auto;
+}
+
 /*# sourceMappingURL=App.css.map */

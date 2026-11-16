@@ -1,8 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import EditTrip from "./EditTrip";
 import DestinationSearch from "./DestinationSearch";
+import TripMap from "./TripMap";
+import EditTripStop from "./EditTripStop";
+import TripStopPhotos from "./TripStopPhotos";
 
 const initialDestination = {
   name: "",
@@ -34,15 +37,87 @@ export default function TripDetails() {
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState("");
 
+  const [isAddDestinationOpen, setIsAddDestinationOpen] = useState(false);
+  const [addDestinationError, setAddDestinationError] = useState("");
+  const addDestinationButton = useRef(null);
   const [destination, setDestination] = useState(initialDestination);
   const [addingDestination, setAddingDestination] = useState(false);
   const [removingDestination, setRemovingDestination] = useState(null);
   const [destinationError, setDestinationError] = useState("");
   const [reorderingStops, setReorderingStops] = useState(false);
 
+  const [editingStop, setEditingStop] = useState(null);
+  const [savingStop, setSavingStop] = useState(false);
+  const [editStopError, setEditStopError] = useState("");
+  const [photoStop, setPhotoStop] = useState(null);
+
+  const isDestinationBusy =
+    addingDestination ||
+    removingDestination !== null ||
+    reorderingStops ||
+    savingStop;
+
+  const handleStartEditStop = stop => {
+    // Copy the saved values so Cancel can discard the draft.
+    setEditingStop({
+      id: stop.id,
+      name: stop.name,
+      type: stop.type,
+      city: stop.city ?? "",
+      state: stop.state ?? "",
+      country: stop.country ?? "",
+      airportCode: stop.airportCode ?? "",
+    });
+    setEditStopError("");
+  };
+
+  const handleEditStopChange = event => {
+    const { name, value } = event.target;
+    setEditingStop(previous => ({ ...previous, [name]: value }));
+    setEditStopError("");
+  };
+
+  const handleCancelEditStop = () => {
+    setEditingStop(null);
+    setEditStopError("");
+  };
+
+  const handleSaveStop = async event => {
+    event.preventDefault();
+
+    if (!editingStop || isDestinationBusy) return;
+
+    const { id: stopId, ...fields } = editingStop;
+
+    setSavingStop(true);
+    setEditStopError("");
+
+    try {
+      const response = await api.patch(
+        `/api/trips/${id}/stops/${stopId}`,
+        fields,
+      );
+      setTrip(response.data.trip);
+      handleCancelEditStop();
+    } catch (error) {
+      setEditStopError(
+        error.response?.data?.message || "Unable to update this destination.",
+      );
+    } finally {
+      setSavingStop(false);
+    }
+  };
+
   const handleTripUpdated = updatedTrip => {
     setTrip(updatedTrip);
     setIsEditing(false);
+  };
+
+  const closeAddDestination = () => {
+    setIsAddDestinationOpen(false);
+    setDestination({ ...initialDestination });
+    setAddDestinationError("");
+    addDestinationButton.current?.focus();
   };
 
   const handleDestinationChange = e => {
@@ -53,11 +128,11 @@ export default function TripDetails() {
       [name]: value,
     }));
 
-    setDestinationError("");
+    setAddDestinationError("");
   };
 
   const handleAddSelectedAirport = async selectedAirport => {
-    if (addingDestination || removingDestination !== null || reorderingStops) {
+    if (isDestinationBusy) {
       return;
     }
 
@@ -94,13 +169,12 @@ export default function TripDetails() {
   const handleAddDestination = async e => {
     e.preventDefault();
 
-    if (addingDestination || removingDestination !== null || reorderingStops)
-      return;
+    if (isDestinationBusy) return;
 
     const name = destination.name.trim();
 
     if (!name || name.length > 150) {
-      setDestinationError(
+      setAddDestinationError(
         "Destination name must be between 1 and 150 characters.",
       );
       return;
@@ -109,12 +183,12 @@ export default function TripDetails() {
     const code = destination.airportCode.trim().toUpperCase();
 
     if (code && !/^[A-Z0-9]{3}$/.test(code)) {
-      setDestinationError("Airport code must contain three characters.");
+      setAddDestinationError("Airport code must contain three characters.");
       return;
     }
 
     setAddingDestination(true);
-    setDestinationError("");
+    setAddDestinationError("");
 
     try {
       const response = await api.post(`/api/trips/${id}/stops`, {
@@ -127,11 +201,11 @@ export default function TripDetails() {
       });
 
       setTrip(response.data.trip);
-      setDestination({ ...initialDestination });
+      closeAddDestination();
     } catch (error) {
       console.error("Unable to add destination:", error);
 
-      setDestinationError(
+      setAddDestinationError(
         error.response?.data?.message ||
           error.response?.data?.error ||
           "Unable to add destination. Please try again.",
@@ -142,7 +216,7 @@ export default function TripDetails() {
   };
 
   const handleMoveStop = async (stopId, direction) => {
-    if (reorderingStops || addingDestination || removingDestination !== null) {
+    if (isDestinationBusy) {
       return;
     }
 
@@ -190,7 +264,7 @@ export default function TripDetails() {
   };
 
   const handleRemoveStop = async stopId => {
-    if (removingDestination !== null || addingDestination) return;
+    if (isDestinationBusy) return;
 
     setRemovingDestination(stopId);
     setDestinationError("");
@@ -213,7 +287,7 @@ export default function TripDetails() {
   };
 
   const handleRemoveLegacyDestination = async code => {
-    if (removingDestination !== null || addingDestination) return;
+    if (isDestinationBusy) return;
 
     setRemovingDestination(code);
     setDestinationError("");
@@ -359,11 +433,26 @@ export default function TripDetails() {
   // Count only destinations actually displayed.
   const destinationCount = itineraryStops.length;
 
-  const isDestinationBusy =
-    addingDestination || removingDestination !== null || reorderingStops;
-
   return (
     <main className="container py-4">
+      <style>{`
+        .trip-add-destination-panel {
+          display: grid;
+          grid-template-rows: 0fr;
+          transition: grid-template-rows 220ms ease;
+        }
+
+        .trip-add-destination-panel[aria-hidden="false"] {
+          grid-template-rows: 1fr;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .trip-add-destination-panel {
+            transition: none;
+          }
+        }
+      `}</style>
+
       <Link to="/my-trips" className="btn btn-outline-secondary btn-sm mb-4">
         &larr; Back to My Trips
       </Link>
@@ -518,145 +607,218 @@ export default function TripDetails() {
             />
           </div>
 
-          {/* Unified destination form */}
-          <form
-            onSubmit={handleAddDestination}
-            className="border rounded-3 p-3 mb-4"
-          >
-            <h3 className="h6 mb-3">Add Destination</h3>
+          {itineraryStops.length > 0 && <TripMap stops={itineraryStops} />}
 
-            <div className="row g-3">
-              <div className="col-12 col-md-8">
-                <label htmlFor="destination-name" className="form-label">
-                  Destination Name
-                </label>
+          <div className="mb-4 d-grid d-lg-block">
+            <button
+              ref={addDestinationButton}
+              type="button"
+              className="btn btn-outline-primary"
+              aria-expanded={isAddDestinationOpen}
+              aria-controls="add-destination-panel"
+              aria-disabled={addingDestination}
+              onClick={() => {
+                if (addingDestination) return;
 
-                <input
-                  id="destination-name"
-                  name="name"
-                  type="text"
-                  className="form-control"
-                  placeholder="e.g. Phoenix or Grand Canyon"
-                  value={destination.name}
-                  onChange={handleDestinationChange}
-                  maxLength={150}
-                  required
-                  disabled={isDestinationBusy}
-                />
-              </div>
+                if (isAddDestinationOpen) {
+                  closeAddDestination();
+                } else {
+                  setIsAddDestinationOpen(true);
+                }
+              }}
+            >
+              {isAddDestinationOpen
+                ? "Hide Add Destination"
+                : "Add Destination"}
+            </button>
 
-              <div className="col-12 col-md-4">
-                <label htmlFor="destination-type" className="form-label">
-                  Destination Type
-                </label>
-
-                <select
-                  id="destination-type"
-                  name="type"
-                  className="form-select"
-                  value={destination.type}
-                  onChange={handleDestinationChange}
-                  disabled={isDestinationBusy}
+            <div
+              id="add-destination-panel"
+              className="trip-add-destination-panel"
+              aria-hidden={!isAddDestinationOpen}
+            >
+              <div className="overflow-hidden">
+                <form
+                  onSubmit={handleAddDestination}
+                  className="border rounded-3 p-3 mt-3"
                 >
-                  {destinationTypes.map(type => (
-                    <option key={type.value} value={type.value}>
-                      {type.label}
-                    </option>
-                  ))}
-                </select>
+                  <h3 className="h6 mb-3">Add Destination</h3>
+
+                  <div className="row g-3">
+                    <div className="col-12 col-md-8">
+                      <label htmlFor="destination-name" className="form-label">
+                        Destination Name
+                      </label>
+
+                      <input
+                        id="destination-name"
+                        name="name"
+                        type="text"
+                        className="form-control"
+                        placeholder="e.g. Phoenix or Grand Canyon"
+                        value={destination.name}
+                        onChange={handleDestinationChange}
+                        maxLength={150}
+                        required
+                        disabled={!isAddDestinationOpen || isDestinationBusy}
+                      />
+                    </div>
+
+                    <div className="col-12 col-md-4">
+                      <label htmlFor="destination-type" className="form-label">
+                        Destination Type
+                      </label>
+
+                      <select
+                        id="destination-type"
+                        name="type"
+                        className="form-select"
+                        value={destination.type}
+                        onChange={handleDestinationChange}
+                        disabled={!isAddDestinationOpen || isDestinationBusy}
+                      >
+                        {destinationTypes.map(type => (
+                          <option key={type.value} value={type.value}>
+                            {type.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="col-12 col-md-4">
+                      <label htmlFor="destination-city" className="form-label">
+                        City (Optional)
+                      </label>
+
+                      <input
+                        id="destination-city"
+                        name="city"
+                        type="text"
+                        className="form-control"
+                        value={destination.city}
+                        onChange={handleDestinationChange}
+                        maxLength={150}
+                        disabled={!isAddDestinationOpen || isDestinationBusy}
+                      />
+                    </div>
+
+                    <div className="col-12 col-md-4">
+                      <label htmlFor="destination-state" className="form-label">
+                        State / Region (Optional)
+                      </label>
+
+                      <input
+                        id="destination-state"
+                        name="state"
+                        type="text"
+                        className="form-control"
+                        value={destination.state}
+                        onChange={handleDestinationChange}
+                        maxLength={150}
+                        disabled={!isAddDestinationOpen || isDestinationBusy}
+                      />
+                    </div>
+
+                    <div className="col-12 col-md-4">
+                      <label
+                        htmlFor="destination-country"
+                        className="form-label"
+                      >
+                        Country (Optional)
+                      </label>
+
+                      <input
+                        id="destination-country"
+                        name="country"
+                        type="text"
+                        className="form-control"
+                        value={destination.country}
+                        onChange={handleDestinationChange}
+                        maxLength={150}
+                        disabled={!isAddDestinationOpen || isDestinationBusy}
+                      />
+                    </div>
+
+                    {destination.type === "airport" && (
+                      <div className="col-12 col-md-4">
+                        <label
+                          htmlFor="destination-airport-code"
+                          className="form-label"
+                        >
+                          Airport Code (Optional)
+                        </label>
+
+                        <input
+                          id="destination-airport-code"
+                          name="airportCode"
+                          type="text"
+                          className="form-control"
+                          placeholder="e.g. PHX"
+                          value={destination.airportCode}
+                          onChange={handleDestinationChange}
+                          maxLength={3}
+                          disabled={!isAddDestinationOpen || isDestinationBusy}
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  {addDestinationError && (
+                    <p className="text-danger mt-3 mb-0" role="alert">
+                      {addDestinationError}
+                    </p>
+                  )}
+
+                  <div className="d-flex flex-wrap gap-2 mt-3">
+                    <button
+                      type="submit"
+                      className="btn btn-primary"
+                      disabled={!isAddDestinationOpen || isDestinationBusy}
+                    >
+                      {addingDestination ? "Adding..." : "Add Destination"}
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-outline-secondary"
+                      onClick={closeAddDestination}
+                      disabled={!isAddDestinationOpen || addingDestination}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
               </div>
-
-              <div className="col-12 col-md-4">
-                <label htmlFor="destination-city" className="form-label">
-                  City (Optional)
-                </label>
-
-                <input
-                  id="destination-city"
-                  name="city"
-                  type="text"
-                  className="form-control"
-                  value={destination.city}
-                  onChange={handleDestinationChange}
-                  maxLength={150}
-                  disabled={isDestinationBusy}
-                />
-              </div>
-
-              <div className="col-12 col-md-4">
-                <label htmlFor="destination-state" className="form-label">
-                  State / Region (Optional)
-                </label>
-
-                <input
-                  id="destination-state"
-                  name="state"
-                  type="text"
-                  className="form-control"
-                  value={destination.state}
-                  onChange={handleDestinationChange}
-                  maxLength={150}
-                  disabled={isDestinationBusy}
-                />
-              </div>
-
-              <div className="col-12 col-md-4">
-                <label htmlFor="destination-country" className="form-label">
-                  Country (Optional)
-                </label>
-
-                <input
-                  id="destination-country"
-                  name="country"
-                  type="text"
-                  className="form-control"
-                  value={destination.country}
-                  onChange={handleDestinationChange}
-                  maxLength={150}
-                  disabled={isDestinationBusy}
-                />
-              </div>
-
-              {destination.type === "airport" && (
-                <div className="col-12 col-md-4">
-                  <label
-                    htmlFor="destination-airport-code"
-                    className="form-label"
-                  >
-                    Airport Code (Optional)
-                  </label>
-
-                  <input
-                    id="destination-airport-code"
-                    name="airportCode"
-                    type="text"
-                    className="form-control"
-                    placeholder="e.g. PHX"
-                    value={destination.airportCode}
-                    onChange={handleDestinationChange}
-                    maxLength={3}
-                    disabled={isDestinationBusy}
-                  />
-                </div>
-              )}
             </div>
-
-            <div className="mt-3">
-              <button
-                type="submit"
-                className="btn btn-primary"
-                disabled={isDestinationBusy}
-              >
-                {addingDestination ? "Adding..." : "Add Destination"}
-              </button>
-            </div>
-          </form>
+          </div>
 
           {/* Destination errors */}
           {destinationError && (
             <p className="text-danger small" role="alert">
               {destinationError}
             </p>
+          )}
+
+          {editingStop && (
+            <EditTripStop
+              stop={editingStop}
+              destinationTypes={destinationTypes}
+              isBusy={isDestinationBusy}
+              isSaving={savingStop}
+              error={editStopError}
+              onChange={handleEditStopChange}
+              onSave={handleSaveStop}
+              onCancel={handleCancelEditStop}
+            />
+          )}
+
+          {photoStop && (
+            <TripStopPhotos
+              key={`${id}:${photoStop.id}`}
+              tripId={id}
+              stop={photoStop}
+              onTripUpdated={setTrip}
+              onClose={() => setPhotoStop(null)}
+            />
           )}
 
           {/* Unified itinerary display */}
@@ -667,10 +829,7 @@ export default function TripDetails() {
           ) : (
             <ul className="list-group">
               {itineraryStops.map((stop, index) => (
-                <li
-                  key={stop.id}
-                  className="list-group-item d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3"
-                >
+                <li key={stop.id} className="list-group-item trip-stop-row">
                   <div>
                     <div className="fw-semibold">📍 {stop.name}</div>
 
@@ -704,7 +863,16 @@ export default function TripDetails() {
                     </div>
                   </div>
 
-                  <div className="d-flex flex-wrap align-items-center gap-2">
+                  <button
+                    type="button"
+                    className="btn btn-outline-primary d-flex flex-wrap align-items-center gap-2 trip-stop-row__actions"
+                    onClick={() => setPhotoStop(stop)}
+                    aria-label={`Photos for ${stop.name}`}
+                  >
+                    Photos ({stop.photos?.length ?? 0})
+                  </button>
+
+                  <div className="d-flex flex-wrap align-items-center gap-2 ms-5">
                     {!stop.isLegacy && (
                       <>
                         <button
@@ -730,6 +898,16 @@ export default function TripDetails() {
                         >
                           ↓
                         </button>
+
+                        <button
+                          type="button"
+                          className="btn btn-outline-primary btn-sm"
+                          onClick={() => handleStartEditStop(stop)}
+                          disabled={isDestinationBusy || Boolean(editingStop)}
+                          aria-label={`Edit ${stop.name}`}
+                        >
+                          Edit
+                        </button>
                       </>
                     )}
 
@@ -741,7 +919,9 @@ export default function TripDetails() {
                           ? handleRemoveLegacyDestination(stop.airportCode)
                           : handleRemoveStop(stop.id)
                       }
-                      disabled={isDestinationBusy}
+                      disabled={
+                        isDestinationBusy || editingStop?.id === stop.id
+                      }
                       aria-label={`Remove ${stop.name} from trip`}
                     >
                       {removingDestination ===
