@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import PublicPageMetadata from "./PublicPageMetadata";
 import {
   Link,
   NavLink,
@@ -272,6 +273,7 @@ export default function NavRoot() {
 
       {/* Page content / navigation loading */}
       <div className="flex-grow-1">
+        <PublicPageMetadata />
         {isNavigating ? <LoadingSpinner message="Loading" /> : <Outlet />}
       </div>
 

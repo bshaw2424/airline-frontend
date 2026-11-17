@@ -7,6 +7,8 @@ import StateDropDownList from "./StateDropDownList";
 import { useAuth } from "../../context/AuthContext";
 import api from "../../api/axios";
 
+import { usePageMetadata } from "../PublicPageMetadata";
+
 const Featured = ({ airlines = [], slug }) => {
   const navigate = useNavigate();
   const { isLoggedIn, loading: authLoading } = useAuth();
@@ -92,6 +94,14 @@ const Featured = ({ airlines = [], slug }) => {
 
   // Find selected airline
   const airline = airlines.find(airline => airline.slug === slug);
+
+  usePageMetadata({
+    title: airline?.name ? `${airline.name} | FlightInRange` : undefined,
+    description: airline?.name
+      ? `See where ${airline.name} flies and browse its destinations by airport, state, or service type.`
+      : undefined,
+    path: airline ? `/airlines/${encodeURIComponent(airline.slug)}` : undefined,
+  });
 
   // Hooks have all been called, so conditional return is safe
   if (!airline) {

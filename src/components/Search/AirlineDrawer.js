@@ -151,8 +151,11 @@ export default function AirlineDrawer({ airline, onClose }) {
         {/* Drawer footer */}
         {airline.slug && (
           <footer className="border-top p-3 p-md-4 d-flex justify-content-center justify-content-md-end">
-            <Link to={`/airlines/${airline.slug}`} className="btn btn-primary">
-              View {airline.name} Page →
+            <Link
+              to={`/airlines/${airline.slug}/destinations`}
+              className="btn btn-primary"
+            >
+              View {airline.name} Page
             </Link>
           </footer>
         )}

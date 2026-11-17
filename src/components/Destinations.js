@@ -1,9 +1,24 @@
-import { useLoaderData } from "react-router-dom";
+import { useLoaderData, useParams } from "react-router-dom";
 import api from "../api/axios";
 import AirlineDestinationsPage from "./AirlineDestinationsPage";
+import { usePageMetadata } from "./PublicPageMetadata";
 
 function Destinations() {
   const airline = useLoaderData();
+  const { slug } = useParams();
+  const airlineName = airline?.name;
+
+  usePageMetadata({
+    title: airlineName
+      ? `${airlineName} Destinations | FlightInRange`
+      : undefined,
+    description: airlineName
+      ? `Explore airports served by ${airlineName} and filter destinations by state or by domestic and international service.`
+      : undefined,
+    path: slug
+      ? `/airlines/${encodeURIComponent(slug)}/destinations`
+      : undefined,
+  });
 
   return <AirlineDestinationsPage airline={airline} />;
 }
