@@ -56,5 +56,18 @@ export default function PublicPageMetadata() {
     path,
   });
 
+  const isTripPage = path === "/my-trips" || path.startsWith("/my-trips/");
+
+  useEffect(() => {
+    if (!isTripPage) return;
+
+    const robotsTag = document.createElement("meta");
+    robotsTag.name = "robots";
+    robotsTag.content = "noindex";
+    document.head.appendChild(robotsTag);
+
+    return () => robotsTag.remove();
+  }, [isTripPage]);
+
   return null;
 }
