@@ -103,6 +103,16 @@ for (const page of pages) {
 
   fs.mkdirSync(path.dirname(destination), { recursive: true });
   fs.writeFileSync(destination, html);
+  if (page.route === "/airlines/delta-airlines/destinations") {
+    const flatDestination = path.join(
+      buildDirectory,
+      "airlines",
+      "delta-airlines",
+      "destinations.html",
+    );
+
+    fs.writeFileSync(flatDestination, html);
+  }
 }
 
 console.log(`Generated metadata for ${pages.length} public pages.`);
