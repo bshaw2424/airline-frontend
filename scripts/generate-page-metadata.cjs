@@ -106,6 +106,12 @@ for (const page of pages) {
   if (page.route === "/destinations") {
     fs.writeFileSync(path.join(buildDirectory, "destinations.html"), html);
   }
+  if (page.route === "/destinations" || page.route === "/airlines") {
+    fs.writeFileSync(
+      path.join(buildDirectory, `${page.route.slice(1)}.html`),
+      html,
+    );
+  }
   if (page.route === "/airlines/delta-airlines/destinations") {
     const flatDestination = path.join(
       buildDirectory,
