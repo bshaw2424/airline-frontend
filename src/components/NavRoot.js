@@ -124,6 +124,15 @@ export default function NavRoot() {
                     About
                   </NavLink>
                 </li>
+                <li className="nav-item">
+                  <NavLink
+                    to="/getting-started"
+                    className="nav-link"
+                    onClick={handleNavLinkClick}
+                  >
+                    Getting Started
+                  </NavLink>
+                </li>
                 {/* Give signed-in users and guests a way to open the feedback form. */}
                 <li className="nav-item">
                   <NavLink

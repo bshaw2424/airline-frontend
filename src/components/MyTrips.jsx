@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import api from "../api/axios";
 import CreateTrip from "./CreateTrip";
 import TripCard from "./TripCard";
+import FeatureTips from "./FeatureTips";
 
 export default function MyTrips() {
   const [trips, setTrips] = useState([]);
@@ -46,6 +47,10 @@ export default function MyTrips() {
       <div className="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4">
         <div>
           <h1 className="fw-bold">My Trips</h1>
+          <FeatureTips feature="my-trips">
+            Open a trip to add places to your itinerary and reorder stops as
+            your plans change.
+          </FeatureTips>
           <p className="text-muted mb-0">
             Plan and organize your upcoming adventures.
           </p>

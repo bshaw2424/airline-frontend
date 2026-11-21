@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLoaderData, useNavigate } from "react-router-dom";
+import FeatureTips from "./FeatureTips";
 
 import {
   FaFolderOpen,
@@ -216,6 +217,10 @@ export default function Collections() {
           {showForm ? "Close Form" : "New Collection"}
         </button>
       </div>
+
+      <FeatureTips feature="collections">
+        Save places in Collections while you’re deciding where to go.
+      </FeatureTips>
 
       {/* General errors */}
       {error && (
