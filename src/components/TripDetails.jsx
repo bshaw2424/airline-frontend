@@ -24,6 +24,23 @@ const destinationTypes = [
   { value: "custom", label: "Custom Place" },
 ];
 
+const tripIdeaGroups = [
+  {
+    category: "Beaches",
+    ideas: [
+      { id: "san-diego-mission-beach", name: "Mission Beach" },
+      { id: "san-diego-la-jolla-shores", name: "La Jolla Shores" },
+    ],
+  },
+  {
+    category: "Attractions",
+    ideas: [
+      { id: "san-diego-balboa-park", name: "Balboa Park" },
+      { id: "san-diego-uss-midway-museum", name: "USS Midway Museum" },
+    ],
+  },
+];
+
 export default function TripDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -38,6 +55,10 @@ export default function TripDetails() {
   const [deleteError, setDeleteError] = useState("");
 
   const [isAddDestinationOpen, setIsAddDestinationOpen] = useState(false);
+  const [isFindIdeasOpen, setIsFindIdeasOpen] = useState(false);
+  const [ideaCategory, setIdeaCategory] = useState("All");
+  const [savingIdeaId, setSavingIdeaId] = useState(null);
+  const [saveIdeaError, setSaveIdeaError] = useState("");
   const [addDestinationError, setAddDestinationError] = useState("");
   const addDestinationButton = useRef(null);
   const [destination, setDestination] = useState(initialDestination);
@@ -50,6 +71,8 @@ export default function TripDetails() {
   const [savingStop, setSavingStop] = useState(false);
   const [editStopError, setEditStopError] = useState("");
   const [photoStop, setPhotoStop] = useState(null);
+  const [movingIdeaId, setMovingIdeaId] = useState(null);
+  const [moveIdeaError, setMoveIdeaError] = useState("");
 
   const isDestinationBusy =
     addingDestination ||
@@ -393,6 +416,13 @@ export default function TripDetails() {
 
   if (!trip) return null;
 
+  const savedIdeaIds = new Set(trip.savedIdeas ?? []);
+  const savedIdeas = tripIdeaGroups.flatMap(({ category, ideas }) =>
+    ideas
+      .filter(idea => savedIdeaIds.has(idea.id))
+      .map(idea => ({ ...idea, category })),
+  );
+
   const tripStops = trip.tripStops || [];
   const legacyDestinations = trip.destinations || [];
 
@@ -432,6 +462,46 @@ export default function TripDetails() {
 
   // Count only destinations actually displayed.
   const destinationCount = itineraryStops.length;
+
+  const handleMoveIdea = async ideaId => {
+    setMovingIdeaId(ideaId);
+    setMoveIdeaError("");
+
+    try {
+      const { data } = await api.post(`/api/trips/${id}/ideas/${ideaId}/move`);
+
+      setTrip(currentTrip =>
+        currentTrip?._id === id ? data.trip : currentTrip,
+      );
+    } catch (error) {
+      setMoveIdeaError(
+        error.response?.data?.message || "Unable to move this idea.",
+      );
+    } finally {
+      setMovingIdeaId(null);
+    }
+  };
+
+  const handleSaveIdea = async ideaId => {
+    setSavingIdeaId(ideaId);
+    setSaveIdeaError("");
+
+    try {
+      const { data } = await api.post(`/api/trips/${id}/ideas`, { ideaId });
+
+      setTrip(currentTrip =>
+        currentTrip?._id === id
+          ? { ...currentTrip, savedIdeas: data.savedIdeas }
+          : currentTrip,
+      );
+    } catch (error) {
+      setSaveIdeaError(
+        error.response?.data?.message || "Unable to save this idea.",
+      );
+    } finally {
+      setSavingIdeaId(null);
+    }
+  };
 
   return (
     <main className="container py-4">
@@ -609,7 +679,7 @@ export default function TripDetails() {
 
           {itineraryStops.length > 0 && <TripMap stops={itineraryStops} />}
 
-          <div className="mb-4 d-grid d-lg-block">
+          <div className="mb-4 d-grid gap-2 d-lg-flex">
             <button
               ref={addDestinationButton}
               type="button"
@@ -631,165 +701,285 @@ export default function TripDetails() {
                 ? "Hide Add Destination"
                 : "Add Destination"}
             </button>
-
-            <div
-              id="add-destination-panel"
-              className="trip-add-destination-panel"
-              aria-hidden={!isAddDestinationOpen}
+            <button
+              type="button"
+              className="btn btn-outline-primary"
+              aria-expanded={isFindIdeasOpen}
+              aria-controls="find-ideas-panel"
+              onClick={() => setIsFindIdeasOpen(open => !open)}
             >
-              <div className="overflow-hidden">
-                <form
-                  onSubmit={handleAddDestination}
-                  className="border rounded-3 p-3 mt-3"
-                >
-                  <h3 className="h6 mb-3">Add Destination</h3>
+              {isFindIdeasOpen ? "Hide ideas" : "Find ideas"}
+            </button>
+          </div>
 
-                  <div className="row g-3">
-                    <div className="col-12 col-md-8">
-                      <label htmlFor="destination-name" className="form-label">
-                        Destination Name
-                      </label>
+          <div
+            id="add-destination-panel"
+            className="trip-add-destination-panel"
+            aria-hidden={!isAddDestinationOpen}
+          >
+            <div className="overflow-hidden">
+              <form
+                onSubmit={handleAddDestination}
+                className="border rounded-3 p-3 mt-3"
+              >
+                <h3 className="h6 mb-3">Add Destination</h3>
 
-                      <input
-                        id="destination-name"
-                        name="name"
-                        type="text"
-                        className="form-control"
-                        placeholder="e.g. Phoenix or Grand Canyon"
-                        value={destination.name}
-                        onChange={handleDestinationChange}
-                        maxLength={150}
-                        required
-                        disabled={!isAddDestinationOpen || isDestinationBusy}
-                      />
-                    </div>
+                <div className="row g-3">
+                  <div className="col-12 col-md-8">
+                    <label htmlFor="destination-name" className="form-label">
+                      Destination Name
+                    </label>
 
-                    <div className="col-12 col-md-4">
-                      <label htmlFor="destination-type" className="form-label">
-                        Destination Type
-                      </label>
-
-                      <select
-                        id="destination-type"
-                        name="type"
-                        className="form-select"
-                        value={destination.type}
-                        onChange={handleDestinationChange}
-                        disabled={!isAddDestinationOpen || isDestinationBusy}
-                      >
-                        {destinationTypes.map(type => (
-                          <option key={type.value} value={type.value}>
-                            {type.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="col-12 col-md-4">
-                      <label htmlFor="destination-city" className="form-label">
-                        City (Optional)
-                      </label>
-
-                      <input
-                        id="destination-city"
-                        name="city"
-                        type="text"
-                        className="form-control"
-                        value={destination.city}
-                        onChange={handleDestinationChange}
-                        maxLength={150}
-                        disabled={!isAddDestinationOpen || isDestinationBusy}
-                      />
-                    </div>
-
-                    <div className="col-12 col-md-4">
-                      <label htmlFor="destination-state" className="form-label">
-                        State / Region (Optional)
-                      </label>
-
-                      <input
-                        id="destination-state"
-                        name="state"
-                        type="text"
-                        className="form-control"
-                        value={destination.state}
-                        onChange={handleDestinationChange}
-                        maxLength={150}
-                        disabled={!isAddDestinationOpen || isDestinationBusy}
-                      />
-                    </div>
-
-                    <div className="col-12 col-md-4">
-                      <label
-                        htmlFor="destination-country"
-                        className="form-label"
-                      >
-                        Country (Optional)
-                      </label>
-
-                      <input
-                        id="destination-country"
-                        name="country"
-                        type="text"
-                        className="form-control"
-                        value={destination.country}
-                        onChange={handleDestinationChange}
-                        maxLength={150}
-                        disabled={!isAddDestinationOpen || isDestinationBusy}
-                      />
-                    </div>
-
-                    {destination.type === "airport" && (
-                      <div className="col-12 col-md-4">
-                        <label
-                          htmlFor="destination-airport-code"
-                          className="form-label"
-                        >
-                          Airport Code (Optional)
-                        </label>
-
-                        <input
-                          id="destination-airport-code"
-                          name="airportCode"
-                          type="text"
-                          className="form-control"
-                          placeholder="e.g. PHX"
-                          value={destination.airportCode}
-                          onChange={handleDestinationChange}
-                          maxLength={3}
-                          disabled={!isAddDestinationOpen || isDestinationBusy}
-                        />
-                      </div>
-                    )}
+                    <input
+                      id="destination-name"
+                      name="name"
+                      type="text"
+                      className="form-control"
+                      placeholder="e.g. Phoenix or Grand Canyon"
+                      value={destination.name}
+                      onChange={handleDestinationChange}
+                      maxLength={150}
+                      required
+                      disabled={!isAddDestinationOpen || isDestinationBusy}
+                    />
                   </div>
 
-                  {addDestinationError && (
-                    <p className="text-danger mt-3 mb-0" role="alert">
-                      {addDestinationError}
-                    </p>
-                  )}
+                  <div className="col-12 col-md-4">
+                    <label htmlFor="destination-type" className="form-label">
+                      Destination Type
+                    </label>
 
-                  <div className="d-flex flex-wrap gap-2 mt-3">
-                    <button
-                      type="submit"
-                      className="btn btn-primary"
+                    <select
+                      id="destination-type"
+                      name="type"
+                      className="form-select"
+                      value={destination.type}
+                      onChange={handleDestinationChange}
                       disabled={!isAddDestinationOpen || isDestinationBusy}
                     >
-                      {addingDestination ? "Adding..." : "Add Destination"}
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-outline-secondary"
-                      onClick={closeAddDestination}
-                      disabled={!isAddDestinationOpen || addingDestination}
-                    >
-                      Cancel
-                    </button>
+                      {destinationTypes.map(type => (
+                        <option key={type.value} value={type.value}>
+                          {type.label}
+                        </option>
+                      ))}
+                    </select>
                   </div>
-                </form>
-              </div>
+
+                  <div className="col-12 col-md-4">
+                    <label htmlFor="destination-city" className="form-label">
+                      City (Optional)
+                    </label>
+
+                    <input
+                      id="destination-city"
+                      name="city"
+                      type="text"
+                      className="form-control"
+                      value={destination.city}
+                      onChange={handleDestinationChange}
+                      maxLength={150}
+                      disabled={!isAddDestinationOpen || isDestinationBusy}
+                    />
+                  </div>
+
+                  <div className="col-12 col-md-4">
+                    <label htmlFor="destination-state" className="form-label">
+                      State / Region (Optional)
+                    </label>
+
+                    <input
+                      id="destination-state"
+                      name="state"
+                      type="text"
+                      className="form-control"
+                      value={destination.state}
+                      onChange={handleDestinationChange}
+                      maxLength={150}
+                      disabled={!isAddDestinationOpen || isDestinationBusy}
+                    />
+                  </div>
+
+                  <div className="col-12 col-md-4">
+                    <label htmlFor="destination-country" className="form-label">
+                      Country (Optional)
+                    </label>
+
+                    <input
+                      id="destination-country"
+                      name="country"
+                      type="text"
+                      className="form-control"
+                      value={destination.country}
+                      onChange={handleDestinationChange}
+                      maxLength={150}
+                      disabled={!isAddDestinationOpen || isDestinationBusy}
+                    />
+                  </div>
+
+                  {destination.type === "airport" && (
+                    <div className="col-12 col-md-4">
+                      <label
+                        htmlFor="destination-airport-code"
+                        className="form-label"
+                      >
+                        Airport Code (Optional)
+                      </label>
+
+                      <input
+                        id="destination-airport-code"
+                        name="airportCode"
+                        type="text"
+                        className="form-control"
+                        placeholder="e.g. PHX"
+                        value={destination.airportCode}
+                        onChange={handleDestinationChange}
+                        maxLength={3}
+                        disabled={!isAddDestinationOpen || isDestinationBusy}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {addDestinationError && (
+                  <p className="text-danger mt-3 mb-0" role="alert">
+                    {addDestinationError}
+                  </p>
+                )}
+
+                <div className="d-flex flex-wrap gap-2 mt-3">
+                  <button
+                    type="submit"
+                    className="btn btn-primary"
+                    disabled={!isAddDestinationOpen || isDestinationBusy}
+                  >
+                    {addingDestination ? "Adding..." : "Add Destination"}
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-outline-secondary"
+                    onClick={closeAddDestination}
+                    disabled={!isAddDestinationOpen || addingDestination}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
+
+          <section
+            id="find-ideas-panel"
+            className="border rounded p-3 mb-4"
+            aria-labelledby="find-ideas-heading"
+            hidden={!isFindIdeasOpen}
+          >
+            <h3 id="find-ideas-heading" className="h5">
+              Ideas for San Diego
+            </h3>
+            {saveIdeaError && (
+              <p className="text-danger mb-3" role="alert">
+                {saveIdeaError}
+              </p>
+            )}
+
+            <div
+              className="d-flex flex-wrap gap-2 mb-3"
+              role="group"
+              aria-label="Filter ideas"
+            >
+              {["All", "Beaches", "Attractions"].map(category => {
+                const isSelected = ideaCategory === category;
+
+                return (
+                  <button
+                    key={category}
+                    type="button"
+                    className={`btn btn-sm ${isSelected ? "btn-primary" : "btn-outline-primary"}`}
+                    aria-pressed={isSelected}
+                    onClick={() => setIdeaCategory(category)}
+                  >
+                    {category}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="row g-3">
+              {tripIdeaGroups
+                .filter(
+                  group =>
+                    ideaCategory === "All" || group.category === ideaCategory,
+                )
+                .map(group => (
+                  <div key={group.category} className="col-sm-6">
+                    <h4 className="h6">{group.category}</h4>
+                    <ul className="mb-0">
+                      {group.ideas.map(idea => {
+                        const isSaved = (trip.savedIdeas ?? []).includes(
+                          idea.id,
+                        );
+                        const isSaving = savingIdeaId === idea.id;
+
+                        return (
+                          <li key={idea.id} className="mb-2">
+                            {idea.name}{" "}
+                            <button
+                              type="button"
+                              className="btn btn-outline-primary btn-sm"
+                              disabled={isSaved || savingIdeaId !== null}
+                              onClick={() => handleSaveIdea(idea.id)}
+                              aria-label={`${isSaved ? "Saved" : "Save"} ${idea.name}`}
+                            >
+                              {isSaved
+                                ? "Saved"
+                                : isSaving
+                                  ? "Saving…"
+                                  : "Save"}
+                            </button>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                ))}
+            </div>
+          </section>
+
+          {savedIdeas.length > 0 && (
+            <section
+              className="border rounded p-3 mb-4"
+              aria-labelledby="saved-ideas-heading"
+            >
+              <h3 id="saved-ideas-heading" className="h5">
+                Saved ideas
+              </h3>
+
+              {moveIdeaError && (
+                <p className="text-danger" role="alert">
+                  {moveIdeaError}
+                </p>
+              )}
+
+              <ul className="list-group list-group-flush">
+                {savedIdeas.map(idea => (
+                  <li key={idea.id} className="list-group-item px-0">
+                    <div className="fw-semibold">{idea.name}</div>
+                    <div className="small text-muted">{idea.category}</div>
+                    <button
+                      type="button"
+                      className="btn btn-outline-primary btn-sm mt-2"
+                      disabled={movingIdeaId !== null || savingIdeaId !== null}
+                      onClick={() => handleMoveIdea(idea.id)}
+                    >
+                      {movingIdeaId === idea.id
+                        ? "Moving…"
+                        : "Move to itinerary"}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
 
           {/* Destination errors */}
           {destinationError && (
@@ -828,6 +1018,7 @@ export default function TripDetails() {
             </p>
           ) : (
             <ul className="list-group">
+              <h4>Itinerary</h4>
               {itineraryStops.map((stop, index) => (
                 <li key={stop.id} className="list-group-item trip-stop-row">
                   <div>
