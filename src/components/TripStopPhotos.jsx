@@ -447,8 +447,8 @@ export default function TripStopPhotos({
             onChange={event => setMediaSort(event.target.value)}
             disabled={editingMediaKey !== null}
           >
-            <option value="oldest">Oldest</option>
             <option value="newest">Newest</option>
+            <option value="oldest">Oldest</option>
           </select>
         </div>
 
