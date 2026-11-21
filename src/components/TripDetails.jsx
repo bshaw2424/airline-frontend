@@ -6,6 +6,7 @@ import DestinationSearch from "./DestinationSearch";
 import TripMap from "./TripMap";
 import EditTripStop from "./EditTripStop";
 import TripStopPhotos from "./TripStopPhotos";
+import TripSharePanel from "./TripSharePanel";
 
 const initialDestination = {
   name: "",
@@ -1023,6 +1024,8 @@ export default function TripDetails() {
               </ul>
             </section>
           )}
+
+          <TripSharePanel key={id} tripId={id} />
 
           {/* Destination errors */}
           {destinationError && (

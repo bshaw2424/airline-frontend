@@ -22,6 +22,9 @@ import Destinations, { destinationsLoader } from "./components/Destinations";
 import ResetPassword from "./components/Auth/ResetPassword";
 import ForgotPassword from "./components/Auth/ForgotPassword";
 import Feedback from "./components/Feedback";
+import SharedItinerary, {
+  sharedItineraryLoader,
+} from "./components/SharedItinerary";
 
 import {
   createBrowserRouter,
@@ -42,6 +45,11 @@ const router = createBrowserRouter(
       <Route index element={<Home />} loader={homeLoader} />
 
       <Route path="about" element={<About />} />
+      <Route
+        path="/shared-itinerary/:token"
+        element={<SharedItinerary />}
+        loader={sharedItineraryLoader}
+      />
       <Route path="/feedback" element={<Feedback />} />
       <Route path="login" element={<Login />} />
       <Route path="register" element={<Register />} />
