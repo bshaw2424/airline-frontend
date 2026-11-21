@@ -73,6 +73,7 @@ export default function TripDetails() {
   const [photoStop, setPhotoStop] = useState(null);
   const [movingIdeaId, setMovingIdeaId] = useState(null);
   const [moveIdeaError, setMoveIdeaError] = useState("");
+  const [unsavingIdeaId, setUnsavingIdeaId] = useState(null);
 
   const isDestinationBusy =
     addingDestination ||
@@ -479,6 +480,27 @@ export default function TripDetails() {
       );
     } finally {
       setMovingIdeaId(null);
+    }
+  };
+
+  const handleUnsaveIdea = async ideaId => {
+    setUnsavingIdeaId(ideaId);
+    setMoveIdeaError("");
+
+    try {
+      const { data } = await api.delete(`/api/trips/${id}/ideas/${ideaId}`);
+
+      setTrip(currentTrip =>
+        currentTrip?._id === id
+          ? { ...currentTrip, savedIdeas: data.savedIdeas }
+          : currentTrip,
+      );
+    } catch (error) {
+      setMoveIdeaError(
+        error.response?.data?.message || "Unable to unsave this idea.",
+      );
+    } finally {
+      setUnsavingIdeaId(null);
     }
   };
 
@@ -923,19 +945,28 @@ export default function TripDetails() {
                         return (
                           <li key={idea.id} className="mb-2">
                             {idea.name}{" "}
-                            <button
-                              type="button"
-                              className="btn btn-outline-primary btn-sm"
-                              disabled={isSaved || savingIdeaId !== null}
-                              onClick={() => handleSaveIdea(idea.id)}
-                              aria-label={`${isSaved ? "Saved" : "Save"} ${idea.name}`}
-                            >
-                              {isSaved
-                                ? "Saved"
-                                : isSaving
-                                  ? "Saving…"
-                                  : "Save"}
-                            </button>
+                            {isSaved ? (
+                              <span
+                                className="text-success ms-1"
+                                role="img"
+                                aria-label="Saved"
+                              >
+                                ✓
+                              </span>
+                            ) : (
+                              <button
+                                type="button"
+                                className="btn btn-outline-primary btn-sm"
+                                disabled={
+                                  savingIdeaId !== null ||
+                                  unsavingIdeaId !== null
+                                }
+                                onClick={() => handleSaveIdea(idea.id)}
+                                aria-label={`Save ${idea.name}`}
+                              >
+                                {isSaving ? "Saving…" : "Save"}
+                              </button>
+                            )}
                           </li>
                         );
                       })}
@@ -974,6 +1005,18 @@ export default function TripDetails() {
                       {movingIdeaId === idea.id
                         ? "Moving…"
                         : "Move to itinerary"}
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-outline-secondary btn-sm mt-2 ms-2"
+                      disabled={
+                        unsavingIdeaId !== null ||
+                        movingIdeaId !== null ||
+                        savingIdeaId !== null
+                      }
+                      onClick={() => handleUnsaveIdea(idea.id)}
+                    >
+                      {unsavingIdeaId === idea.id ? "Removing…" : "Unsave"}
                     </button>
                   </li>
                 ))}
