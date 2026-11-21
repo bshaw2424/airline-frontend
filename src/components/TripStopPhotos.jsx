@@ -27,6 +27,7 @@ export default function TripStopPhotos({
   // Videos and the active gallery filter
   const [videos, setVideos] = useState([]);
   const [mediaFilter, setMediaFilter] = useState("all");
+  const [mediaSort, setMediaSort] = useState("oldest");
 
   // Track the open item and where to return in the gallery.
   const [activeMedia, setActiveMedia] = useState(null);
@@ -130,6 +131,7 @@ export default function TripStopPhotos({
         formData,
       );
 
+      setMediaSort("newest");
       setPhotoListVersion(version => version + 1);
       onTripUpdated?.(data.trip);
     } catch (error) {
@@ -237,9 +239,13 @@ export default function TripStopPhotos({
     ...photos.map(photo => ({ ...photo, type: "photo" })),
     ...videos.map(video => ({ ...video, type: "video" })),
   ]
-    .sort((first, second) =>
-      (first.uploadedAt ?? "").localeCompare(second.uploadedAt ?? ""),
-    )
+    .sort((first, second) => {
+      const uploadOrder = (first.uploadedAt ?? "").localeCompare(
+        second.uploadedAt ?? "",
+      );
+
+      return mediaSort === "newest" ? -uploadOrder : uploadOrder;
+    })
     .filter(item => mediaFilter === "all" || item.type === mediaFilter);
 
   return (
@@ -433,6 +439,18 @@ export default function TripStopPhotos({
             </button>
           ))}
         </div>
+        <div className="d-flex justify-content-center justify-content-lg-start mb-3">
+          <select
+            aria-label="Sort by upload date"
+            className="form-select  w-100"
+            value={mediaSort}
+            onChange={event => setMediaSort(event.target.value)}
+            disabled={editingMediaKey !== null}
+          >
+            <option value="oldest">Oldest</option>
+            <option value="newest">Newest</option>
+          </select>
+        </div>
 
         {/* Gallery loading, error, and empty states */}
         {loading && <p role="status">Loading gallery…</p>}
@@ -466,10 +484,31 @@ export default function TripStopPhotos({
                     <button
                       type="button"
                       className="trip-stop-photos__video-tile d-block w-100 rounded border-0 bg-dark text-white"
+                      style={
+                        photo.thumbnailUrl
+                          ? {
+                              backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.35)), url("${photo.thumbnailUrl}")`,
+                              backgroundPosition: "center",
+                              backgroundSize: "cover",
+                            }
+                          : undefined
+                      }
                       aria-label={`Open video ${index + 1} for ${stop.name}`}
                       onClick={event => openMedia(photo, event.currentTarget)}
                     >
-                      <span aria-hidden="true">▶</span> View video
+                      {Number.isFinite(photo.durationSeconds) ? (
+                        <span
+                          aria-hidden="true"
+                          className="badge bg-dark text-white"
+                        >
+                          {Math.floor(photo.durationSeconds / 60)}:
+                          {String(
+                            Math.floor(photo.durationSeconds % 60),
+                          ).padStart(2, "0")}
+                        </span>
+                      ) : (
+                        <span>View video</span>
+                      )}
                     </button>
                   ) : (
                     <button
