@@ -10,6 +10,12 @@ const template = fs.readFileSync(
 
 const pages = [
   {
+    route: "/getting-started",
+    title: "Getting Started | FlightInRange",
+    description:
+      "Learn how to explore destinations, save places in Collections, and build an itinerary with a sample San Diego trip.",
+  },
+  {
     route: "/",
     title: "FlightInRange | Discover Where Airlines Fly",
     description:
@@ -104,6 +110,12 @@ for (const page of pages) {
   fs.mkdirSync(path.dirname(destination), { recursive: true });
   fs.writeFileSync(destination, html);
 
+  if (page.route !== "/") {
+    const filename = `${page.route.slice(1).replaceAll("/", "-")}.html`;
+    fs.writeFileSync(path.join(buildDirectory, filename), html);
+  }
+
+  // Keep the files used by the existing Amplify rewrites.
   if (page.route === "/airlines/delta-airlines") {
     fs.writeFileSync(
       path.join(buildDirectory, "delta-airlines-overview.html"),
@@ -111,25 +123,16 @@ for (const page of pages) {
     );
   }
 
-  if (page.route === "/destinations") {
-    fs.writeFileSync(path.join(buildDirectory, "destinations.html"), html);
-  }
-
-  if (page.route === "/destinations" || page.route === "/airlines") {
+  if (page.route === "/airlines/delta-airlines/destinations") {
     fs.writeFileSync(
-      path.join(buildDirectory, `${page.route.slice(1)}.html`),
+      path.join(
+        buildDirectory,
+        "airlines",
+        "delta-airlines",
+        "destinations.html",
+      ),
       html,
     );
-  }
-  if (page.route === "/airlines/delta-airlines/destinations") {
-    const flatDestination = path.join(
-      buildDirectory,
-      "airlines",
-      "delta-airlines",
-      "destinations.html",
-    );
-
-    fs.writeFileSync(flatDestination, html);
   }
 }
 
