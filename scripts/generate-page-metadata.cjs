@@ -103,9 +103,18 @@ for (const page of pages) {
 
   fs.mkdirSync(path.dirname(destination), { recursive: true });
   fs.writeFileSync(destination, html);
+
+  if (page.route === "/airlines/delta-airlines") {
+    fs.writeFileSync(
+      path.join(buildDirectory, "delta-airlines-overview.html"),
+      html,
+    );
+  }
+
   if (page.route === "/destinations") {
     fs.writeFileSync(path.join(buildDirectory, "destinations.html"), html);
   }
+
   if (page.route === "/destinations" || page.route === "/airlines") {
     fs.writeFileSync(
       path.join(buildDirectory, `${page.route.slice(1)}.html`),
